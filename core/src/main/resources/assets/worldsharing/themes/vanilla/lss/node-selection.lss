@@ -1,0 +1,17 @@
+NodeSelection {
+  height: 20;
+  orientation: horizontal;
+  space-between-entries: 1;
+  width: 200;
+
+  .refresh-button {
+    width: 20;
+    hover-box-delay: 0;
+    padding: 0;
+
+    Icon {
+      width: 8;
+      height: 8;
+    }
+  }
+}

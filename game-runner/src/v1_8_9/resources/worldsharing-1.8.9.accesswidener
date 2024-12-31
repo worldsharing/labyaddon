@@ -1,0 +1,6 @@
+accessWidener v1 named
+
+accessible field net/minecraft/server/management/ServerConfigurationManager commandsAllowedForAll Z
+accessible field net/minecraft/network/NetworkSystem endpoints Ljava/util/List;
+accessible field net/minecraft/server/management/ServerConfigurationManager maxPlayers I
+accessible field net/minecraft/server/integrated/IntegratedServer isPublic Z

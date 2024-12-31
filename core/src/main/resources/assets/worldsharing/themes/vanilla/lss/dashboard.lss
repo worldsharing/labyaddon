@@ -1,0 +1,129 @@
+.container {
+  width: 350;
+  height: fit-content;
+  min-width: fit-content;
+  min-height: fit-content;
+  min-width: fit-content;
+  min-height: fit-content;
+
+  alignment-x: center;
+  alignment-y: center;
+  space-between-entries: 5;
+
+  border: 1 black;
+  padding: 15;
+  margin: 0 0 10 0;
+
+  .title {
+    width: fit-content;
+    height: fit-content;
+    font-size: 1;
+  }
+  .info {
+      width: fit-content;
+      alignment-x: center;
+  }
+
+  .sides {
+    width: fit-content;
+    height: fit-content;
+    space-between-entries: 15;
+    orientation: horizontal;
+
+    Hr {
+        width: 0.5;
+        height: 100%;
+    }
+  }
+}
+
+
+.player-management {
+    height: 100%;
+    width: 200;
+
+    .text {
+        alignment-x: center;
+    }
+
+    space-between-entries: 1;
+
+    .players {
+        height: 100;
+        width: 100%;
+
+        space-between-entries: 7;
+        .player {
+            height: fit-content;
+            width: fit-content;
+
+            orientation: horizontal;
+
+            Component {
+                padding-top: 2;
+                padding-left: 4;
+            }
+
+            Icon {
+                height: 16;
+                width: 16;
+            }
+
+            .buttons {
+                height: 15;
+                width: fit-content;
+                padding-left: 4;
+
+                Button {
+                    height: 15;
+                    width: fit-content;
+                    Component {
+                        padding: 3;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.button-container {
+    height: fit-content;
+    width: fit-content;
+    alignment-x: center;
+    space-between-entries: 10;
+
+    orientation: horizontal;
+
+    Button {
+        height: 15;
+        min-width: 50;
+        width: fit-content;
+        alignment-x: center;
+    }
+
+}
+
+
+.options {
+    width: fit-content;
+    height: fit-content;
+    padding: 10 3;
+    space-between-entries: 5;
+}
+
+.option {
+    space-between-entries: 10;
+    height: fit-content;
+    width: fit-content;
+    orientation: horizontal;
+
+    .widget {
+        min-width: 80;
+        width: fit-content;
+        height: 14;
+    }
+
+    .label {
+        margin-top: 2;
+    }
+}

@@ -1,0 +1,60 @@
+{
+  "worldsharing": {
+    "settings": {
+      "enabled": {
+        "name": "Enabled"
+      },
+      "debug": {
+        "name": "Debug"
+      },
+      "clearCache": {
+        "name": "Clear Cache",
+        "text": "Clear"
+      },
+      "joinDiscordServer": {
+        "name": "Discord Server",
+        "text": "Join"
+      },
+      "node": {
+        "name": "Node"
+      }
+    },
+    "menu": {
+      "invite_friends": "Invite Friends",
+      "manage_world": "Manage World"
+    },
+    "commands": {
+      "usage": "Usage: %s",
+      "whitelist": {
+        "usage": "/%s <add/remove/list> <Player>",
+        "added": "%s is now whitelisted!",
+        "removed": "%s is no longer whitelisted!",
+        "list": "Currently whitelisted:\n%s",
+        "already_whitelisted": "%s is already whitelisted!",
+        "not_whitelisted": "%s is not whitelisted"
+      }
+    },
+    "enums": {
+      "status": {
+        "connecting": "Connecting...",
+        "connected": "Connected",
+        "disconnected": "Disconnected"
+      },
+      "visibility": {
+        "friends": "Friends Only",
+        "invite": "Invite Only",
+        "public": "Public"
+      }
+    },
+    "messages": {
+      "send_invite": "Sending invite to %s",
+      "share_world": "Share World",
+      "close_tunnel": "Stop Sharing",
+      "invite": "Invite",
+      "visibility": "Visibility",
+      "kick": "Kick",
+      "kicked_player": "You kicked %s",
+      "connection_failed": "Failed to connect%s"
+    }
+  }
+}

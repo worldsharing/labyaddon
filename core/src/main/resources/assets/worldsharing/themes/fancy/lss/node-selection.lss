@@ -1,0 +1,11 @@
+@import super();
+
+NodeSelection {
+  .refresh-button {
+    height: 20;
+
+    Icon {
+
+    }
+  }
+}
