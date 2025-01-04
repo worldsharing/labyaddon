@@ -8,17 +8,31 @@
         "name": "Debug"
       },
       "clearCache": {
-        "name": "Cache leeren",
+        "name": "Cache",
         "text": "Leeren"
       },
       "joinDiscordServer": {
         "name": "Discord Server",
         "text": "Beitreten"
+      },
+      "node": {
+        "name": "Node"
       }
     },
     "menu": {
+      "close": "Schließen",
+      "share": "Welt Teilen",
+      "reason": "Grund",
+      "kick": "Kick",
       "invite_friends": "Freunde einladen",
-      "manage_world": "Welt verwalten"
+      "manage_world": "Welt verwalten",
+      "dashboard": {
+        "allow_cheats": "Cheats erlauben",
+        "difficulty": "Schwierigkeit",
+        "game_mode": "Spielmodus",
+        "slots": "Slots",
+        "port": "Port"
+      }
     },
     "commands": {
       "usage": "Verwendung: %s",
@@ -44,14 +58,16 @@
       }
     },
     "messages": {
-      "send_invite": "Einladung wurde an %s gesendet.",
-      "share_world": "Welt teilen",
-      "close_tunnel": "Teilen beenden",
-      "invite": "Einladen",
       "visibility": "Sichtbarkeit",
-      "kick": "Kick",
-      "kicked_player": "Du hast %s rausgeworfen",
-      "connection_failed": "Verbindungsaufbau fehlgeschlagen%s"
+      "kick": "%s rauswerfen",
+      "connection_failed": "Verbindungsaufbau fehlgeschlagen%s",
+      "warn_stop_sharing": "Willst du das teilen beenden?",
+      "warn_players_kicked": "%s Spieler werden gekickt",
+      "empty_world": "Keine Spieler online",
+      "world_player_count": "%s Spieler online",
+      "public_domain": "Öffentliche Domain: %s",
+      "copy_domain": "Kopieren",
+      "shared_to_lan": "Im LAN geöffnet"
     }
   }
 }

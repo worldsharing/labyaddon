@@ -4,16 +4,14 @@ import net.labymod.api.util.I18n;
 
 public enum WorldVisibility {
 
-    INVITE_ONLY(0, "invite"),
-    FRIENDS_ONLY(1, "friends"),
-    PUBLIC(2, "public");
+    INVITE(0),
+    FRIENDS(1),
+    PUBLIC(2);
 
     public final byte value;
-    private final String name;
 
-    WorldVisibility(int value, String name) {
+    WorldVisibility(int value) {
         this.value = (byte) value;
-        this.name = name;
     }
 
     public static WorldVisibility fromValue(byte value) {
@@ -27,6 +25,6 @@ public enum WorldVisibility {
 
     @Override
     public String toString() {
-        return I18n.translate("worldsharing.enums.visibility." + name);
+        return I18n.translate("worldsharing.enums.visibility." + name().toLowerCase());
     }
 }

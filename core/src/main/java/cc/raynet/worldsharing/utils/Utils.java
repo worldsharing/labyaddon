@@ -1,7 +1,7 @@
 package cc.raynet.worldsharing.utils;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
-import cc.raynet.worldsharing.protocol.types.VarInt;
+import cc.raynet.worldsharing.protocol.PacketBuffer;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -30,8 +30,8 @@ public class Utils {
     }
 
     public static String DeserializeString(InputStream stream) throws IOException {
-        VarInt length = VarInt.readFromStream(stream);
-        byte[] buf = new byte[length.value()];
+        int length = PacketBuffer.readVarIntFromStream(stream);
+        byte[] buf = new byte[length];
         stream.read(buf);
 
         return new String(buf, StandardCharsets.UTF_8);
@@ -47,7 +47,7 @@ public class Utils {
             hashtable.put("com.sun.jndi.dns.timeout.retries", "1");
             dircontext = new InitialDirContext(hashtable);
         } catch (Throwable throwable) {
-            return new InetSocketAddress("connect.ray.rip",40886);
+            return new InetSocketAddress("connect." + WorldsharingAddon.GATEWAY_DOMAIN, 40886);
         }
 
         Attribute attribute = dircontext.getAttributes("_rayconnect._tcp." + supplier, new String[]{"SRV"}).get("srv");

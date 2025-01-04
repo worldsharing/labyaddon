@@ -38,10 +38,11 @@ public class DashboardActivity extends Activity {
     private final WorldsharingAddon addon;
 
     private int port;
-    private boolean allowCheats;
+    private FlexibleContentWidget options;
 
     public DashboardActivity(WorldsharingAddon addon) {
         this.addon = addon;
+
     }
 
     @Override
@@ -54,21 +55,15 @@ public class DashboardActivity extends Activity {
 
         FlexibleContentWidget container = new FlexibleContentWidget().addId("container");
 
-        FlexibleContentWidget options = new FlexibleContentWidget();
+        options = new FlexibleContentWidget();
         options.addId("options");
 
         if (port == 0) {
             port = bridge.getSuitableLanPort();
         }
-        /* OPTIONS */
 
         // Allow Cheats
-        SwitchWidget allowCheatsSwitch = SwitchWidget.create(value -> {
-            allowCheats = value;
-            if (bridge.isPublished()) {
-                bridge.setCheatsEnabled(value);
-            }
-        });
+        SwitchWidget allowCheatsSwitch = SwitchWidget.create(bridge::setCheatsEnabled);
         allowCheatsSwitch.setValue(bridge.cheatsEnabled());
 
         // Difficulty
@@ -89,7 +84,7 @@ public class DashboardActivity extends Activity {
 
         // Port Input
         TextFieldWidget portInput = new TextFieldWidget();
-        portInput.placeholder(Component.text("Port"));
+        portInput.placeholder(Component.translatable("worldsharing.menu.dashboard.port"));
         portInput.updateListener(e -> port = e.isEmpty() ? 0 : Integer.parseInt(e));
         portInput.maximalLength(5);
         portInput.validator(s -> {
@@ -113,19 +108,20 @@ public class DashboardActivity extends Activity {
         visibilityDropDown.setSelected(addon.sessionHandler.tunnelInfo.visibility);
         visibilityDropDown.setChangeListener(e -> addon.sessionHandler.sendPacket(new PacketVisibilityUpdate(e), b -> addon.sessionHandler.tunnelInfo.visibility = e));
 
-        options.addContent(addOption(Component.translatable("selectWorld.allowCommands"), allowCheatsSwitch));
-        options.addContent(addOption(Component.translatable("options.difficulty"), difficultyDropDown));
-        options.addContent(addOption(Component.translatable("selectWorld.gameMode"), gameModeDropDown));
-        options.addContent(addOption(Component.text("Max Slots"), maxSlotsSlider));
-        options.addContent(addOption(Component.translatable("lanServer.port"), portInput));
-        options.addContent(addOption(Component.translatable("worldsharing.messages.visibility"), visibilityDropDown));
+
+        addOption("allow_cheats", allowCheatsSwitch);
+        addOption("difficulty", difficultyDropDown);
+        addOption("game_mode", gameModeDropDown);
+        addOption("slots", maxSlotsSlider);
+        addOption("port", portInput);
+        addOption(Component.translatable("worldsharing.messages.visibility"), visibilityDropDown);
 
         container.addContent(switch (addon.sessionHandler.getState()) {
             case CONNECTED -> ComponentWidget.i18n("worldsharing.enums.status.connected");
             case CONNECTING -> ComponentWidget.i18n("worldsharing.enums.status.connecting");
             default -> {
                 if (addon.sessionHandler.getState() == ConnectionState.DISCONNECTED && bridge.isPublished() && addon.sessionHandler.lastError == null) {
-                    yield ComponentWidget.text("Shared to LAN");
+                    yield ComponentWidget.i18n("worldsharing.messages.shared_to_lan");
                 }
                 if (addon.sessionHandler.lastError == null) {
                     yield ComponentWidget.i18n("worldsharing.enums.status.disconnected");
@@ -141,7 +137,7 @@ public class DashboardActivity extends Activity {
 
         FlexibleContentWidget playerManagement = new FlexibleContentWidget();
         playerManagement.addId("player-management");
-        playerManagement.addContent(ComponentWidget.text(addon.sessionHandler.players.isEmpty() ? "no players online" : addon.sessionHandler.players.size() + " players online")
+        playerManagement.addContent(ComponentWidget.component(addon.sessionHandler.players.isEmpty() ? Component.translatable("worldsharing.messages.empty_world") : Component.translatable("worldsharing.messages.world_player_count", Component.text(addon.sessionHandler.players.size())))
                 .addId("text"));
 
         FlexibleContentWidget players = new FlexibleContentWidget();
@@ -161,14 +157,14 @@ public class DashboardActivity extends Activity {
             FlexibleContentWidget buttons = new FlexibleContentWidget();
             buttons.addId("buttons");
 
-            buttons.addContent(ButtonWidget.component(Component.text("Kick"), () -> {
+            buttons.addContent(ButtonWidget.component(Component.translatable("worldsharing.menu.kick"), () -> {
                 var in = new TextFieldWidget();
                 in.maximalLength(255);
                 in.setEditable(true);
-                in.placeholder(Component.text("Reason"));
+                in.placeholder(Component.translatable("worldsharing.menu.reason"));
                 in.setFocused(true);
                 SimpleAdvancedPopup.builder()
-                        .title(Component.text("Kick " + p.username))
+                        .title(Component.translatable("worldsharing.messages.kick", Component.text(p.username)))
                         .widget(() -> in)
                         .addButton(SimplePopupButton.create(Component.text("kick"), e -> {
                             String reason = in.getText();
@@ -194,12 +190,12 @@ public class DashboardActivity extends Activity {
 
         ButtonWidget shareButton = new ButtonWidget();
         shareButton.setEnabled(!addon.sessionHandler.isConnected());
-        shareButton.text().set(Component.text("Share"));
+        shareButton.text().set(Component.translatable("worldsharing.menu.share"));
         shareButton.setActionListener(this::init);
 
         ButtonWidget closeButton = new ButtonWidget();
         closeButton.setEnabled(bridge.isPublished() || addon.sessionHandler.isConnected());
-        closeButton.text().set(Component.text("Close"));
+        closeButton.text().set(Component.translatable("worldsharing.menu.close"));
         closeButton.setActionListener(() -> {
             if (!addon.sessionHandler.isConnected() && bridge.isPublished()) {
                 bridge.stopServer();
@@ -211,9 +207,9 @@ public class DashboardActivity extends Activity {
                 return;
             }
             SimpleAdvancedPopup.builder()
-                    .title(Component.text("Do you want to stop sharing?"))
-                    .description(Component.text(String.format("%s player%s will be kicked", addon.sessionHandler.players.size(), addon.sessionHandler.players.size() == 1 ? "" : "s")))
-                    .addButton(SimplePopupButton.create(Component.text("Close"), e -> addon.sessionHandler.disconnect()))
+                    .title(Component.translatable("worldsharing.messages.warn_stop_sharing"))
+                    .description(Component.translatable("worldsharing.messages.warn_players_kicked", Component.text(addon.sessionHandler.players.size())))
+                    .addButton(SimplePopupButton.create(Component.translatable("worldsharing.menu.close"), e -> addon.sessionHandler.disconnect()))
                     .build()
                     .displayAsActivity();
         });
@@ -222,7 +218,7 @@ public class DashboardActivity extends Activity {
         openToLan.text().set(Component.translatable("menu.shareToLan"));
         openToLan.setEnabled(!bridge.isPublished());
         openToLan.setActionListener(() -> {
-            bridge.publishLanWorld(port, bridge.getGameMode(), allowCheats);
+            bridge.publishLanWorld(port, bridge.getGameMode(), bridge.cheatsEnabled());
             reload();
         });
 
@@ -236,7 +232,11 @@ public class DashboardActivity extends Activity {
         document.addChild(container);
     }
 
-    private Widget addOption(Component component, Widget widget) {
+    private void addOption(String value, Widget widget) {
+        addOption(Component.translatable("worldsharing.menu.dashboard." + value), widget);
+    }
+
+    private void addOption(Component component, Widget widget) {
         FlexibleContentWidget container = new FlexibleContentWidget();
         container.addId("option");
 
@@ -245,13 +245,13 @@ public class DashboardActivity extends Activity {
             widget.addId("widget");
             container.addContent(widget);
         }
-        return container;
+        options.addContent(container);
     }
 
     private synchronized void init() {
         VersionBridge bridge = VersionStorage.bridge;
 
-        if (bridge.isPublished() || bridge.publishLanWorld(port, bridge.getGameMode(), allowCheats)) {
+        if (bridge.isPublished() || bridge.publishLanWorld(port, bridge.getGameMode(), bridge.cheatsEnabled())) {
             addon.sessionHandler.init();
         } else {
             WorldsharingAddon.LOGGER.warn("failed to publish lan world");

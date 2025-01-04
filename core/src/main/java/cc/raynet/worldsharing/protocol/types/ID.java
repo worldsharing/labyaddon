@@ -13,7 +13,7 @@ public enum ID {
     TUNNEL_INFO(19),
     INIT_QUIC(26),
     KICK_PLAYER(34),
-    MESSAGE(35), //laby only
+    MESSAGE(35),
     LOGIN(40),
     ENCRYPTION_REQUEST(41),
     ENCRYPTION_RESPONSE(42),

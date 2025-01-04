@@ -9,13 +9,11 @@ public class NavigationElement extends ScreenNavigationElement {
 
     private final Component name;
     private final String widgetId;
-    private final boolean show;
 
-    public NavigationElement(Component name, String widgetId, boolean show, ScreenInstance instance) {
+    public NavigationElement(String widgetId, ScreenInstance instance) {
         super(instance);
-        this.name = name;
+        this.name = Component.text(widgetId);
         this.widgetId = widgetId;
-        this.show = show;
     }
 
     @Override
@@ -30,7 +28,7 @@ public class NavigationElement extends ScreenNavigationElement {
 
     @Override
     public boolean isVisible() {
-        return show;
+        return false;
     }
 
     @Override

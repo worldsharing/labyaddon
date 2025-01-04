@@ -20,8 +20,19 @@
       }
     },
     "menu": {
+      "close": "Close",
+      "share": "Share",
+      "reason": "Reason",
+      "kick": "Kick",
       "invite_friends": "Invite Friends",
-      "manage_world": "Manage World"
+      "manage_world": "Manage World",
+      "dashboard": {
+        "allow_cheats": "Allow Cheats",
+        "difficulty": "Difficulty",
+        "game_mode": "GameMode",
+        "port": "Port",
+        "slots": "Slots"
+      }
     },
     "commands": {
       "usage": "Usage: %s",
@@ -47,14 +58,16 @@
       }
     },
     "messages": {
-      "send_invite": "Sending invite to %s",
-      "share_world": "Share World",
-      "close_tunnel": "Stop Sharing",
-      "invite": "Invite",
       "visibility": "Visibility",
-      "kick": "Kick",
-      "kicked_player": "You kicked %s",
-      "connection_failed": "Failed to connect%s"
+      "kick": "Kick %s",
+      "connection_failed": "Failed to connect%s",
+      "warn_stop_sharing": "Do you want to stop sharing?",
+      "warn_players_kicked": "%s player(s) will be kicked",
+      "empty_world": "no players online",
+      "world_player_count": "%s player(s) online",
+      "public_domain": "Public Domain: %s",
+      "copy_domain": "Copy",
+      "shared_to_lan": "Shared to LAN"
     }
   }
 }

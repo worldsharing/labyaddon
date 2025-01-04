@@ -6,11 +6,10 @@ import cc.raynet.worldsharing.protocol.model.Player;
 import cc.raynet.worldsharing.protocol.model.TunnelRequest;
 import cc.raynet.worldsharing.protocol.proxy.ChannelProxy;
 import cc.raynet.worldsharing.protocol.types.ID;
-import cc.raynet.worldsharing.protocol.types.VarInt;
-import cc.raynet.worldsharing.serverlist.WorldsServerTab;
 import cc.raynet.worldsharing.utils.CryptUtils;
 import cc.raynet.worldsharing.utils.Utils;
 import cc.raynet.worldsharing.utils.VersionStorage;
+import io.netty.buffer.Unpooled;
 import net.labymod.api.util.Pair;
 import net.luminis.quic.QuicClientConnection;
 import net.luminis.quic.QuicStream;
@@ -51,8 +50,8 @@ public class Tunnel {
         QuicStream authStream = connection.createStream(true);
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        VarInt.writeToStream(buffer, VarInt.size(ID.INIT_QUIC.value) + sessionHandler.tunnelInfo.key.length());
-        VarInt.writeToStream(buffer, ID.INIT_QUIC.value);
+        PacketBuffer.writeVarIntToStream(buffer, PacketBuffer.varIntSize(ID.INIT_QUIC.value) + sessionHandler.tunnelInfo.key.length());
+        PacketBuffer.writeVarIntToStream(buffer, ID.INIT_QUIC.value);
         buffer.writeBytes(sessionHandler.tunnelInfo.key.getBytes(StandardCharsets.UTF_8));
         buffer.flush();
 

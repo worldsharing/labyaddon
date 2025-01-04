@@ -64,29 +64,24 @@ public class CryptUtils {
         return null;
     }
 
-    public static PublicKey convertPKCS1ToPublicKey(String pemKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        // PKCS#1 ASN.1 Encoded Token
-
-        String[] lines = pemKey.split("\n");
-        StringBuilder result = new StringBuilder();
-        for (int i = 1; i < lines.length - 1; i++) {
-            result.append(lines[i]);
-        }
-
-        return convertPKCS1ToPublicKey(Base64.getDecoder().decode(result.toString().getBytes(StandardCharsets.UTF_8)));
-    }
-
     public static PublicKey decodePKIXPublicKey(byte[] keyBytes, String algorithm) throws NoSuchAlgorithmException, InvalidKeySpecException {
         X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
         return keyFactory.generatePublic(spec);
     }
 
-    private static PublicKey convertPKCS1ToPublicKey(byte[] pkcs1Bytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static PublicKey convertPKCS1ToPublicKey(String pemKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        String[] lines = pemKey.split("\n");
+        StringBuilder result = new StringBuilder();
+        for (int i = 1; i < lines.length - 1; i++) {
+            result.append(lines[i]);
+        }
+
         // Parse the PKCS#1 key
         BigInteger modulus;
         BigInteger exponent;
-        try (ASN1InputStream asn1InputStream = new ASN1InputStream(pkcs1Bytes)) {
+        try (ASN1InputStream asn1InputStream = new ASN1InputStream(Base64.getDecoder()
+                .decode(result.toString().getBytes(StandardCharsets.UTF_8)))) {
             ASN1Primitive primitive = asn1InputStream.readObject();
             ASN1Sequence sequence = (ASN1Sequence) primitive;
             modulus = ((ASN1Integer) sequence.getObjectAt(0)).getValue();

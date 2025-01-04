@@ -30,7 +30,6 @@ labyMod {
             val file = file("./game-runner/src/${this.sourceSetName}/resources/worldsharing-${versionId}.accesswidener")
             accessWidener.set(file)
 
-
         }
 
     }

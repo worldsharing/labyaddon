@@ -50,7 +50,5 @@ public abstract class PacketHandler extends SimpleChannelInboundHandler<Object> 
 
     public abstract void handle(PacketReady ready);
 
-    public abstract void handle(PacketKickPlayer kick);
-
     public abstract void handle(PacketWhitelist whitelist);
 }

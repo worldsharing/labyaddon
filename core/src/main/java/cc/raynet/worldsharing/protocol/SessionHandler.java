@@ -23,6 +23,7 @@ import net.labymod.api.Laby;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.component.event.ClickEvent;
 import net.labymod.api.client.component.event.HoverEvent;
+import net.labymod.api.client.component.format.NamedTextColor;
 import net.labymod.api.client.resources.ResourceLocation;
 import net.labymod.api.concurrent.ThreadFactoryBuilder;
 import net.labymod.api.util.Pair;
@@ -58,7 +59,6 @@ public class SessionHandler extends PacketHandler {
     public TunnelInfo tunnelInfo;
     public String lastError;
     public Map<String, Pair<QuicClientConnection, Boolean>> tunnels = new ConcurrentHashMap<>();
-    public List<Runnable> executeOnInit = new ArrayList<>();
     private ChannelHandler channelHandler = null;
     private String worldName;
     private int maxSlots;
@@ -144,7 +144,7 @@ public class SessionHandler extends PacketHandler {
 
     private synchronized void connect() throws Exception {
         if (state != ConnectionState.DISCONNECTED) {
-            WorldsharingAddon.LOGGER.warn("Already connected or connecting. Aborting.");
+            WorldsharingAddon.LOGGER.warn("Already connected or connecting.");
             return;
         }
 
@@ -160,7 +160,6 @@ public class SessionHandler extends PacketHandler {
                 .handler(this.channelHandler);
 
         bootstrap.connect(Utils.getTunnelControlAddr(WorldsharingAddon.GATEWAY_DOMAIN)).syncUninterruptibly();
-
 
         byte[] sharedSecret = Utils.randomString(16).getBytes(StandardCharsets.UTF_8);
 
@@ -200,7 +199,7 @@ public class SessionHandler extends PacketHandler {
                             .sessionAccessor()
                             .getSession(), new BigInteger(bytes).toString(16))
                     .get()) {
-                disconnect("failed to authenticate with auth servers");
+                disconnect("failed to authenticate");
                 return;
             }
         } catch (ExecutionException | InterruptedException e) {
@@ -235,9 +234,10 @@ public class SessionHandler extends PacketHandler {
     public void handle(PacketTunnelInfo ti) {
         tunnelInfo = ti.tunnelInfo;
 
-        addon.displayMessage(Component.text("§aPublic Domain:§f " + tunnelInfo.hostname)
-                .clickEvent(ClickEvent.copyToClipboard(tunnelInfo.hostname))
-                .hoverEvent(HoverEvent.showText(Component.text("§aClick to copy"))));
+        addon.displayMessage(Component.translatable("worldsharing.messages.public_domain", NamedTextColor.GREEN)
+                .argument(Component.text(tunnelInfo.hostname, NamedTextColor.WHITE)
+                        .clickEvent(ClickEvent.copyToClipboard(tunnelInfo.hostname))
+                        .hoverEvent(HoverEvent.showText(Component.translatable("worldsharing.messages.copy_domain", NamedTextColor.GREEN)))));
     }
 
     @Override
@@ -254,7 +254,7 @@ public class SessionHandler extends PacketHandler {
 
     @Override
     public void handle(PacketDisconnect disconnect) {
-        WorldsharingAddon.LOGGER.info("received disconnect packet, reason: " + disconnect.reason);
+        WorldsharingAddon.LOGGER.debug("received disconnect packet, reason: " + disconnect.reason);
         disconnect("Reason: " + disconnect.reason);
     }
 
@@ -263,13 +263,7 @@ public class SessionHandler extends PacketHandler {
         state = ConnectionState.CONNECTED;
         addon.dashboardActivity.reloadDashboard();
         AddonMessageUtil.send(AddonMessageUtil.getOnlineFriendsUUIDs(), AddonMessageUtil.ACTION_ADD);
-        Laby.labyAPI().minecraft().sounds().playSound(ResourceLocation.create("labymod","lootbox.common"), 1f,1f);
-    }
-
-    @Override
-    public void handle(PacketKickPlayer kick) {
-        executeOnInit.forEach(Runnable::run);
-        executeOnInit.clear();
+        Laby.labyAPI().minecraft().sounds().playSound(ResourceLocation.create("labymod", "lootbox.common"), 1f, 1f);
     }
 
     @Override

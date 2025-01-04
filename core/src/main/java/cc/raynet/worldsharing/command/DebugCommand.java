@@ -16,8 +16,7 @@ public class DebugCommand extends Command {
     @Override
     public boolean execute(String prefix, String[] arguments) {
         if (!instance.sessionHandler.isConnected()) {
-            displayMessage("§cnot connected");
-            return true;
+            return false;
         }
         displayMessage("§cState: §f" + instance.sessionHandler.getState());
         displayMessage("§cConnected: §f" + instance.sessionHandler.isConnected());

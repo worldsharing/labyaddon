@@ -36,6 +36,13 @@ public class APIHandler {
         gson = new GsonBuilder().registerTypeAdapter(InetAddress.class, new InetAddressDeserializer()).create();
     }
 
+    public static InetAddress getClosestNode(InetAddress address) {
+        if (!Utils.isLanWorldDomain(address.getHostName())) {
+            return address;
+        }
+        return WorldsharingAddon.INSTANCE.api.getClosestNode2(address);
+    }
+
     public Map<String, Integer> getPings() {
         if (pings.isEmpty()) {
             try {
@@ -45,13 +52,6 @@ public class APIHandler {
             }
         }
         return pings;
-    }
-
-    public static InetAddress getClosestNode(InetAddress address) {
-        if (!Utils.isLanWorldDomain(address.getHostName())) {
-            return address;
-        }
-        return WorldsharingAddon.INSTANCE.api.getClosestNode2(address);
     }
 
     public void init() {
@@ -109,7 +109,7 @@ public class APIHandler {
 
     public Map<String, Integer> calculatePings() throws UnknownHostException {
         Map<String, Integer> result = new HashMap<>();
-        InetAddress[] ips = InetAddress.getAllByName("relays.worldshar.ing");
+        InetAddress[] ips = InetAddress.getAllByName("relays." + WorldsharingAddon.GATEWAY_DOMAIN);
         for (InetAddress ip : ips) {
             try {
                 result.put(ip.getHostAddress(), (int) TCPing(new InetSocketAddress(ip, 25565)));
@@ -122,11 +122,8 @@ public class APIHandler {
     }
 
     public Map<String, Integer> getHostPingData(String host) throws WebRequestException {
-        Response<Map<String, Integer>> req = Request.ofGson(new TypeToken<Map<String, Integer>>() {})
-                .method(Method.GET)
-                .url(endpoint + "pingData?host=" + host)
-                .handleErrorStream()
-                .executeSync();
+        Response<Map<String, Integer>> req = Request.ofGson(new TypeToken<Map<String, Integer>>() {
+        }).method(Method.GET).url(endpoint + "pingData?host=" + host).handleErrorStream().executeSync();
 
         if (req.hasException()) {
             throw req.exception();
@@ -170,7 +167,8 @@ public class APIHandler {
             throw new WebRequestException(new Exception("Unexpected response code: " + req.getStatusCode()));
         }
 
-        Type mapType = new TypeToken<Map<String, InetAddress>>() {}.getType();
+        Type mapType = new TypeToken<Map<String, InetAddress>>() {
+        }.getType();
 
         return gson.fromJson(req.get(), mapType);
     }

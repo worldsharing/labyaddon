@@ -2,7 +2,6 @@ import net.labymod.labygradle.common.extension.LabyModAnnotationProcessorExtensi
 
 dependencies {
     labyProcessor()
-    labyApi("core") // for PacketAddonDevelopmentEvent
     api(project(":api"))
 
     // quic

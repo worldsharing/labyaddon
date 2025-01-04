@@ -12,7 +12,6 @@ import java.util.UUID;
 
 public class AddonMessageUtil {
 
-    // für die serverliste
     public static final byte ACTION_ADD = 1;
     public static final byte ACTION_REMOVE = 2;
     public static final byte ACTION_INVITE = 3;
@@ -48,6 +47,9 @@ public class AddonMessageUtil {
     }
 
     public static UUID[] getOnlineFriendsUUIDs() {
+        if (Laby.labyAPI().labyConnect().getSession() == null) {
+            return null;
+        }
         List<Friend> labyFriends = Laby.labyAPI().labyConnect().getSession().getFriends();
         if (labyFriends == null) {
             return null;
@@ -60,10 +62,8 @@ public class AddonMessageUtil {
             if (!friend.isOnline()) {
                 continue;
             }
-            if (sessionHandler.isConnected() && sessionHandler.tunnelInfo.visibility == WorldVisibility.INVITE_ONLY) {
-                if (!sessionHandler.whitelistedPlayers.contains(friend.getName())) {
-                    continue;
-                }
+            if (sessionHandler.isConnected() && sessionHandler.tunnelInfo.visibility == WorldVisibility.INVITE && !sessionHandler.whitelistedPlayers.contains(friend.getName())) {
+                continue;
             }
             friendsUUIDs.add(friend.getUniqueId());
         }

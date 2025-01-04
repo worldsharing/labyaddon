@@ -2,6 +2,9 @@ package cc.raynet.worldsharing.protocol;
 
 import io.netty.buffer.ByteBuf;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -20,6 +23,42 @@ public class PacketBuffer {
         }
 
         buf.writeByte(input);
+    }
+
+    public static void writeVarIntToStream(OutputStream outputStream, int tmp) throws IOException {
+        do {
+            // Encode next 7 bits + terminator bit
+            int bits = tmp & 0x7F;
+            tmp >>>= 7;
+            byte b = (byte) (bits + ((tmp != 0) ? 0x80 : 0));
+            outputStream.write(b);
+        } while (tmp != 0);
+    }
+
+    public static int readVarIntFromStream(InputStream inputStream) throws IOException {
+        int tmp;
+        int result = 0;
+        int shift = 0;
+        int bytesRead = 0;
+        do {
+            tmp = inputStream.read();
+            result |= (tmp & 0x7F) << shift;
+            shift += 7;
+            bytesRead++;
+            if (bytesRead > 5) { // VarInt can have at most 5 bytes in this encoding
+                throw new IOException("VarInt is too long");
+            }
+        } while ((tmp & 0x80) != 0);
+        return result;
+    }
+
+    public static int varIntSize(int value) {
+        int result = 0;
+        do {
+            result++;
+            value >>>= 7;
+        } while (value != 0);
+        return result;
     }
 
     public ByteBuf getBuffer() {
@@ -73,68 +112,16 @@ public class PacketBuffer {
         return this.buffer.readByte();
     }
 
-    public UUID readUUID() {
-        return UUID.fromString(this.readString());
-    }
-
-    public void writeUUID(UUID uuid) {
-        this.writeString(uuid.toString());
-    }
-
-    public void readBytes(byte[] data) {
-        this.buffer.readBytes(data);
-    }
-
     public void writeBytes(byte[] data) {
         this.buffer.writeBytes(data);
-    }
-
-    public short readShort() {
-        return this.buffer.readShort();
-    }
-
-    public boolean readBoolean() {
-        return this.buffer.readBoolean();
     }
 
     public int readInt() {
         return this.buffer.readInt();
     }
 
-    public long readLong() {
-        return this.buffer.readLong();
-    }
-
-    public float readFloat() {
-        return this.buffer.readFloat();
-    }
-
-    public double readDouble() {
-        return this.buffer.readDouble();
-    }
-
-    public void writeShort(short value) {
-        this.buffer.writeShort(value);
-    }
-
-    public void writeBoolean(boolean value) {
-        this.buffer.writeBoolean(value);
-    }
-
     public void writeInt(int value) {
         this.buffer.writeInt(value);
-    }
-
-    public void writeLong(long value) {
-        this.buffer.writeLong(value);
-    }
-
-    public void writeFloat(float value) {
-        this.buffer.writeFloat(value);
-    }
-
-    public void writeDouble(double value) {
-        this.buffer.writeDouble(value);
     }
 
     public String readString() {

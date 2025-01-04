@@ -20,7 +20,6 @@ public class Protocol {
         register(ID.PONG, PacketPong.class);
         register(ID.READY, PacketReady.class);
         register(ID.REQUEST_TUNNEL, PacketRequestTunnel.class);
-        register(ID.KICK_PLAYER, PacketKickPlayer.class);
     }
 
     private void register(ID id, Class<? extends Packet> clazz) {

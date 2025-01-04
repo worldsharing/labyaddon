@@ -4,17 +4,15 @@ import net.labymod.api.Laby;
 
 public enum GameDifficulty {
 
-    PEACEFUL(0, "peaceful"),
-    EASY(1, "easy"),
-    NORMAL(2, "normal"),
-    HARD(3, "hard");
+    PEACEFUL(0),
+    EASY(1),
+    NORMAL(2),
+    HARD(3);
 
     private final int id;
-    private final String name;
 
-    GameDifficulty(int id, String name) {
+    GameDifficulty(int id) {
         this.id = id;
-        this.name = name;
     }
 
     public static GameDifficulty fromId(int id) {
@@ -30,13 +28,9 @@ public enum GameDifficulty {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
-
     @Override
     public String toString() {
-        return Laby.labyAPI().minecraft().getTranslation("options.difficulty." + name);
+        return Laby.labyAPI().minecraft().getTranslation("options.difficulty." + this.name().toLowerCase());
     }
 
 }

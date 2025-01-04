@@ -75,7 +75,8 @@ public class NodeSelection extends FlexibleContentWidget {
     @SettingElement(switchable = StringSwitchableHandler.class)
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
-    public @interface Selector {}
+    public @interface Selector {
+    }
 
     @SettingFactory
     public static class Factory implements WidgetFactory<NodeSelection.Selector, NodeSelection> {

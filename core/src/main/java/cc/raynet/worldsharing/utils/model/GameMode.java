@@ -15,8 +15,7 @@ public enum GameMode {
 
     GameMode(int id) {
         this.id = id;
-        String name = this.name();
-        this.name = CharSequences.toString(CharSequences.capitalize(name.toLowerCase()));
+        this.name = CharSequences.toString(CharSequences.capitalize(name().toLowerCase()));
     }
 
     public static GameMode fromId(int id) {
