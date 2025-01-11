@@ -4,76 +4,36 @@ import cc.raynet.worldsharing.utils.model.GameDifficulty;
 import cc.raynet.worldsharing.utils.model.GameMode;
 import io.netty.channel.ChannelHandler;
 
-import static cc.raynet.worldsharing.utils.Utils.warnUnimplemented;
-
 public interface VersionBridge {
 
-    default void openChannel(ChannelHandler client) {
-        warnUnimplemented();
-    }
+    void openChannel(ChannelHandler client);
 
-    default int getSuitableLanPort() {
-        warnUnimplemented();
-        return -1;
-    }
+    int getSuitableLanPort();
 
-    default boolean publishLanWorld(int port, GameMode gamemode, boolean allowCheats) {
-        warnUnimplemented();
-        return false;
-    }
+    boolean publishLanWorld(int port, GameMode gamemode, boolean allowCheats);
 
-    default boolean isPublished() {
-        warnUnimplemented();
-        return false;
-    }
+    boolean isPublished();
 
-    default String getWorldName() {
-        warnUnimplemented();
-        return null;
-    }
+    String getWorldName();
 
-    default void changeGameMode(GameMode gameMode) {
-        warnUnimplemented();
-    }
+    void changeGameMode(GameMode gameMode);
 
-    default GameMode getGameMode() {
-        warnUnimplemented();
-        return null;
-    }
+    GameMode getGameMode();
 
-    default void changeDifficulty(GameDifficulty difficulty) {
-        warnUnimplemented();
-    }
+    void changeDifficulty(GameDifficulty difficulty);
 
-    default GameDifficulty getDifficulty() {
-        warnUnimplemented();
-        return null;
-    }
+    GameDifficulty getDifficulty();
 
-    default void setCheatsEnabled(boolean enabled) {
-        warnUnimplemented();
-    }
+    void setCheatsEnabled(boolean enabled);
 
-    default boolean cheatsEnabled() {
-        warnUnimplemented();
-        return false;
-    }
+    boolean cheatsEnabled();
 
-    default void kickPlayer(String name, String reason) {
-        warnUnimplemented();
-    }
+    void kickPlayer(String name, String reason);
 
-    default int getSlots() {
-        warnUnimplemented();
-        return -1;
-    }
+    int getSlots();
 
-    default void setSlots(int slots) {
-        warnUnimplemented();
-    }
+    void setSlots(int slots);
 
-    default void stopServer() {
-        warnUnimplemented();
-    }
+    void stopServer();
 
 }

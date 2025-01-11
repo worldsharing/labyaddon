@@ -61,10 +61,4 @@ public class Utils {
         throw new NamingException("Could not find TCP SRV address");
     }
 
-    public static void warnUnimplemented() {
-        if (Thread.currentThread().getStackTrace().length < 3) return;
-        StackTraceElement caller = Thread.currentThread().getStackTrace()[2];
-        WorldsharingAddon.LOGGER.debug("[WARNING] {}#{} is not implemented!", caller.getClassName(), caller.getMethodName());
-    }
-
 }
