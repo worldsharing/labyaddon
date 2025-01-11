@@ -15,21 +15,19 @@ public class PacketLogin extends Packet {
     public int mcVersion;
     public String worldName;
     public int maxPlayers;
-    public Map<String, Integer> pingData;
     public String[] friends;
 
     public PacketLogin() {
         super(ID.LOGIN);
     }
 
-    public PacketLogin(byte visibility, String version, int mcVersion, String worldName, int maxPlayers, Map<String, Integer> pingData, String[] friends) {
+    public PacketLogin(byte visibility, String version, int mcVersion, String worldName, int maxPlayers, String[] friends) {
         this();
         this.visibility = visibility;
         this.version = version;
         this.mcVersion = mcVersion;
         this.worldName = worldName;
         this.maxPlayers = maxPlayers;
-        this.pingData = pingData;
         this.friends = friends;
     }
 
@@ -40,12 +38,6 @@ public class PacketLogin extends Packet {
         mcVersion = buf.readInt();
         worldName = buf.readString();
         maxPlayers = buf.readInt();
-
-        pingData = new HashMap<>();
-        int lPingData = buf.readInt();
-        for (int i = 0; i < lPingData; i++) {
-            pingData.put(buf.readString(), buf.readInt());
-        }
 
         int lFriends = buf.readInt();
         friends = new String[lFriends];
@@ -61,12 +53,6 @@ public class PacketLogin extends Packet {
         buf.writeInt(mcVersion);
         buf.writeString(worldName);
         buf.writeInt(maxPlayers);
-
-        buf.writeInt(pingData.size());
-        for (var set : pingData.entrySet()) {
-            buf.writeString(set.getKey());
-            buf.writeInt(set.getValue());
-        }
 
         buf.writeInt(friends == null ? 0 : friends.length);
         if (friends != null) {

@@ -7,6 +7,7 @@ import cc.raynet.worldsharing.command.WhitelistCommand;
 import cc.raynet.worldsharing.config.AddonConfiguration;
 import cc.raynet.worldsharing.navigation.NavigationElement;
 import cc.raynet.worldsharing.protocol.SessionHandler;
+import io.sentry.Sentry;
 import net.labymod.api.addon.LabyAddon;
 import net.labymod.api.models.addon.annotation.AddonMain;
 import net.labymod.api.util.logging.Logging;
@@ -32,7 +33,6 @@ public class WorldsharingAddon extends LabyAddon<AddonConfiguration> {
     public DashboardActivity dashboardActivity;
     public APIHandler api;
 
-    public List<String> bedrockPlayers = new CopyOnWriteArrayList<>();
     public Map<String, InetAddress> nodes = new HashMap<>();
 
     @Override
@@ -40,10 +40,10 @@ public class WorldsharingAddon extends LabyAddon<AddonConfiguration> {
         this.registerSettingCategory();
         INSTANCE = this;
         LOGGER = logger();
-        //        Sentry.init((options) -> {
-        //            options.setDsn("https://d65276bb7799e005d073f28106e8db69@sentry.rappytv.com/3");
-        //            options.setTracesSampleRate(1.0);
-        //        });
+        Sentry.init((options) -> {
+            options.setDsn("https://d65276bb7799e005d073f28106e8db69@sentry.rappytv.com/3");
+            options.setTracesSampleRate(1.0);
+        });
 
         api = new APIHandler(this);
         sessionHandler = new SessionHandler(this);
@@ -57,6 +57,7 @@ public class WorldsharingAddon extends LabyAddon<AddonConfiguration> {
         configuration().enabled().addChangeListener(v -> {
             if (!v && sessionHandler.isConnected()) {
                 sessionHandler.disconnect();
+                api.pings.clear();
             }
         });
     }

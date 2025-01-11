@@ -210,7 +210,7 @@ public class SessionHandler extends PacketHandler {
         sendPacket(new PacketEncryptionResponse(enc.verifyToken), e -> sendPacket(new PacketLogin(tunnelInfo.visibility.value, addon.addonInfo()
                 .getVersion(), addon.labyAPI()
                 .minecraft()
-                .getProtocolVersion(), worldName, maxSlots, addon.api.getPings(), AddonMessageUtil.getFriendsUUIDs())));
+                .getProtocolVersion(), worldName, maxSlots, AddonMessageUtil.getFriendsUUIDs())));
     }
 
     @Override

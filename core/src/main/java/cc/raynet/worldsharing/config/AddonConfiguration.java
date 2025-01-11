@@ -42,7 +42,7 @@ public class AddonConfiguration extends AddonConfig {
     @MethodOrder(after = "debug")
     @ButtonSetting
     public void clearCache(Setting setting) {
-        WorldsharingAddon.INSTANCE.api.getPings().clear();
+        WorldsharingAddon.INSTANCE.api.pings.clear();
     }
 
 }
