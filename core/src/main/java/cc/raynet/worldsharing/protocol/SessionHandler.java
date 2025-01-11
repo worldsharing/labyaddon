@@ -38,10 +38,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
@@ -50,18 +50,15 @@ public class SessionHandler extends PacketHandler {
     public final WorldsharingAddon addon;
     private final NioEventLoopGroup wsLoopGroup = new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).withNameFormat("WorldsharingNio#%d")
             .build());
-    //    private final ExecutorService executor = Executors.newFixedThreadPool(2, (new ThreadFactoryBuilder()).withNameFormat("WorldsharingExecutor#%d").build());
     private final Protocol protocol;
 
-    public List<Player> players = new CopyOnWriteArrayList<>();
-    public List<String> whitelistedPlayers = new CopyOnWriteArrayList<>();
+    public List<Player> players = Collections.synchronizedList(new ArrayList<>());
+    public List<String> whitelistedPlayers = Collections.synchronizedList(new ArrayList<>());
 
     public TunnelInfo tunnelInfo;
     public String lastError;
     public Map<String, Pair<QuicClientConnection, Boolean>> tunnels = new ConcurrentHashMap<>();
     private ChannelHandler channelHandler = null;
-    private String worldName;
-    private int maxSlots;
     private ConnectionState state;
 
     public SessionHandler(WorldsharingAddon addon) {
@@ -85,8 +82,6 @@ public class SessionHandler extends PacketHandler {
             shutdown();
             return;
         }
-        this.maxSlots = VersionStorage.bridge.getSlots();
-        this.worldName = VersionStorage.bridge.getWorldName();
         Thread.ofVirtual().start(() -> {
             try {
                 connect();
@@ -207,10 +202,14 @@ public class SessionHandler extends PacketHandler {
             return;
         }
 
+        if (VersionStorage.bridge == null) {
+            WorldsharingAddon.LOGGER.debug("VersionBridge is null");
+        }
+
         sendPacket(new PacketEncryptionResponse(enc.verifyToken), e -> sendPacket(new PacketLogin(tunnelInfo.visibility.value, addon.addonInfo()
                 .getVersion(), addon.labyAPI()
                 .minecraft()
-                .getProtocolVersion(), worldName, maxSlots, AddonMessageUtil.getFriendsUUIDs())));
+                .getProtocolVersion(), VersionStorage.bridge.getWorldName(), VersionStorage.bridge.getSlots(), AddonMessageUtil.getFriendsUUIDs())));
     }
 
     @Override

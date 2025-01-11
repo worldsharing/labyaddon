@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 public class PacketBuffer {
 
@@ -137,6 +136,14 @@ public class PacketBuffer {
     public void writeString(String string) {
         buffer.writeInt(string.getBytes(StandardCharsets.UTF_8).length);
         buffer.writeBytes(string.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String readStringVarInt(InputStream stream) throws IOException {
+        byte[] bytes = new byte[readVarIntFromStream(stream)];
+        if(stream.read(bytes) < 1 && bytes.length > 1) {
+            throw new IOException("empty string");
+        }
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
 }

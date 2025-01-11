@@ -9,7 +9,6 @@ import cc.raynet.worldsharing.protocol.types.ID;
 import cc.raynet.worldsharing.utils.CryptUtils;
 import cc.raynet.worldsharing.utils.Utils;
 import cc.raynet.worldsharing.utils.VersionStorage;
-import io.netty.buffer.Unpooled;
 import net.labymod.api.util.Pair;
 import net.luminis.quic.QuicClientConnection;
 import net.luminis.quic.QuicStream;
@@ -85,7 +84,7 @@ public class Tunnel {
             boolean isBedrock = stream.getInputStream().read() == 1;
 
             if (stream.getInputStream().read() == 1) {
-                final Player player = new Player(Utils.DeserializeString(stream.getInputStream()), stream, isBedrock, connection.getServerAddress()
+                final Player player = new Player(PacketBuffer.readStringVarInt(stream.getInputStream()), stream, isBedrock, connection.getServerAddress()
                         .getAddress()
                         .getHostAddress());
                 sessionHandler.players.add(player);

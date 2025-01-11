@@ -14,9 +14,7 @@ import net.labymod.api.util.logging.Logging;
 
 import java.net.InetAddress;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 @AddonMain

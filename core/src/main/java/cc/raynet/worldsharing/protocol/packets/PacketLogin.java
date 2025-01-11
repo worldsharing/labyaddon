@@ -5,9 +5,6 @@ import cc.raynet.worldsharing.protocol.model.Packet;
 import cc.raynet.worldsharing.protocol.model.PacketHandler;
 import cc.raynet.worldsharing.protocol.types.ID;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class PacketLogin extends Packet {
 
     public byte visibility;

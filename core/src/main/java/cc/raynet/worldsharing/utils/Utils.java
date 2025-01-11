@@ -19,24 +19,19 @@ import static cc.raynet.worldsharing.WorldsharingAddon.WORLD_HOST_PATTERN;
 
 public class Utils {
 
+    private static final SecureRandom random = new SecureRandom();
+
     public static boolean isLanWorldDomain(String s) {
         return WORLD_HOST_PATTERN.matcher(s).matches();
     }
 
     public static String randomString(int length) {
         byte[] bytes = new byte[length];
-        new SecureRandom().nextBytes(bytes);
+        random.nextBytes(bytes);
         return Base64.getEncoder().encodeToString(bytes).substring(0, length);
     }
 
-    public static String DeserializeString(InputStream stream) throws IOException {
-        int length = PacketBuffer.readVarIntFromStream(stream);
-        byte[] buf = new byte[length];
-        stream.read(buf);
-
-        return new String(buf, StandardCharsets.UTF_8);
-    }
-
+    @Deprecated
     public static InetSocketAddress getTunnelControlAddr(final String supplier) throws NamingException {
         DirContext dircontext;
         try {

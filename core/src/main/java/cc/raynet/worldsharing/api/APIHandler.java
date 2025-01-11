@@ -10,6 +10,7 @@ import net.labymod.api.util.io.web.exception.WebRequestException;
 import net.labymod.api.util.io.web.request.Request;
 import net.labymod.api.util.io.web.request.Request.Method;
 import net.labymod.api.util.io.web.request.Response;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.*;
