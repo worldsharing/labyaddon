@@ -89,9 +89,6 @@ public class Tunnel {
                         .getAddress()
                         .getHostAddress());
                 sessionHandler.players.add(player);
-                if (player.isBedrock) {
-                    sessionHandler.addon.bedrockPlayers.add(player.username);
-                }
 
                 if (VersionStorage.bridge != null) {
                     VersionStorage.bridge.openChannel(new ChannelProxy(stream, () -> {
