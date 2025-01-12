@@ -2,6 +2,8 @@ package cc.raynet.worldsharing.utils;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
 import cc.raynet.worldsharing.protocol.PacketBuffer;
+import cc.raynet.worldsharing.protocol.SessionHandler;
+import net.labymod.api.Laby;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -54,6 +56,10 @@ public class Utils {
             return new InetSocketAddress(astring[3], Integer.parseInt(astring[2]));
         }
         throw new NamingException("Could not find TCP SRV address");
+    }
+
+    public static String getBrand(String fallback) {
+        return WorldsharingAddon.INSTANCE.sessionHandler.isConnected() ? Laby.labyAPI().getName() + "'s world" : fallback;
     }
 
 }
