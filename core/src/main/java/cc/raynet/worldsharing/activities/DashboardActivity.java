@@ -2,6 +2,7 @@ package cc.raynet.worldsharing.activities;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
 import cc.raynet.worldsharing.protocol.model.Player;
+import cc.raynet.worldsharing.protocol.packets.PacketSlotUpdate;
 import cc.raynet.worldsharing.protocol.packets.PacketVisibilityUpdate;
 import cc.raynet.worldsharing.protocol.types.ConnectionState;
 import cc.raynet.worldsharing.utils.VersionBridge;
@@ -29,6 +30,7 @@ import net.labymod.api.client.gui.screen.widget.widgets.popup.SimpleAdvancedPopu
 import net.labymod.api.client.gui.screen.widget.widgets.popup.SimpleAdvancedPopup.SimplePopupButton;
 import net.labymod.api.client.gui.screen.widget.widgets.renderer.HrWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.renderer.IconWidget;
+import net.labymod.api.labyconnect.LabyConnectSession;
 
 
 @AutoActivity
@@ -36,13 +38,13 @@ import net.labymod.api.client.gui.screen.widget.widgets.renderer.IconWidget;
 public class DashboardActivity extends Activity {
 
     private final WorldsharingAddon addon;
-
     private int port;
     private FlexibleContentWidget options;
+    private int tempSlots;
+    private Player hostPlayer;
 
     public DashboardActivity(WorldsharingAddon addon) {
         this.addon = addon;
-
     }
 
     @Override
@@ -62,6 +64,10 @@ public class DashboardActivity extends Activity {
             port = bridge.getSuitableLanPort();
         }
 
+        if (tempSlots == 0) {
+            tempSlots = bridge.getSlots();
+        }
+
         // Allow Cheats
         SwitchWidget allowCheatsSwitch = SwitchWidget.create(bridge::setCheatsEnabled);
         allowCheatsSwitch.setValue(bridge.cheatsEnabled());
@@ -79,8 +85,30 @@ public class DashboardActivity extends Activity {
         gameModeDropDown.setChangeListener(bridge::changeGameMode);
 
         // Max Slots
-        SliderWidget maxSlotsSlider = new SliderWidget(e -> bridge.setSlots((int) e)).range(2, 16);
-        maxSlotsSlider.setValue(bridge.getSlots());
+
+        SliderWidget maxSlotsSlider = new SliderWidget(val -> {
+            if (addon.sessionHandler.isConnected()) {
+                tempSlots = (int) val;
+            } else {
+                bridge.setSlots((int) val);
+            }
+        }).range(2, (Laby.labyAPI().labyConnect().getSession() == null ? 12 : (Laby.labyAPI().labyConnect().getSession().self().isLabyPlus() ? 32 : 12)));
+        maxSlotsSlider.setValue(addon.sessionHandler.isConnected() ? tempSlots : bridge.getSlots());
+
+
+        // Max Slots Update Button
+        ButtonWidget maxSlotsSaveButton = new ButtonWidget();
+        maxSlotsSaveButton.text().set(Component.text("Update"));
+        maxSlotsSaveButton.setActionListener(() -> {
+            if (tempSlots != bridge.getSlots()) {
+                addon.sessionHandler.sendPacket(new PacketSlotUpdate((int) maxSlotsSlider.getValue()), f -> bridge.setSlots((int) maxSlotsSlider.getValue()));
+            }
+        });
+
+        FlexibleContentWidget maxSlotsContainer = new FlexibleContentWidget();
+        maxSlotsContainer.addContent(maxSlotsSlider);
+        maxSlotsContainer.addContent(maxSlotsSaveButton);
+        maxSlotsContainer.addId("slotscontainer");
 
         // Port Input
         TextFieldWidget portInput = new TextFieldWidget();
@@ -112,7 +140,7 @@ public class DashboardActivity extends Activity {
         addOption("allow_cheats", allowCheatsSwitch);
         addOption("difficulty", difficultyDropDown);
         addOption("game_mode", gameModeDropDown);
-        addOption("slots", maxSlotsSlider);
+        addOption("slots", addon.sessionHandler.isConnected() ? maxSlotsContainer : maxSlotsSlider);
         addOption("port", portInput);
         addOption(Component.translatable("worldsharing.messages.visibility"), visibilityDropDown);
 
@@ -137,47 +165,17 @@ public class DashboardActivity extends Activity {
 
         FlexibleContentWidget playerManagement = new FlexibleContentWidget();
         playerManagement.addId("player-management");
-        playerManagement.addContent(ComponentWidget.component(addon.sessionHandler.players.isEmpty() ? Component.translatable("worldsharing.messages.empty_world") : Component.translatable("worldsharing.messages.world_player_count", Component.text(addon.sessionHandler.players.size())))
+        playerManagement.addContent(ComponentWidget.component(addon.sessionHandler.players.isEmpty() ? Component.translatable("worldsharing.messages.empty_world") : Component.translatable("worldsharing.messages.world_player_count", Component.text(addon.sessionHandler.players.size()+1)))
                 .addId("text"));
 
         FlexibleContentWidget players = new FlexibleContentWidget();
         players.addId("players");
 
-
-        for (Player p : addon.sessionHandler.players) {
-            FlexibleContentWidget player = new FlexibleContentWidget();
-            player.addId("player");
-
-            IconWidget headWidget = new IconWidget(Icon.head(p.username));
-            player.addContent(headWidget);
-
-            ComponentWidget title = ComponentWidget.text(p.username + (p.isBedrock ? " (Bedrock)" : ""));
-            player.addContent(title);
-
-            FlexibleContentWidget buttons = new FlexibleContentWidget();
-            buttons.addId("buttons");
-
-            buttons.addContent(ButtonWidget.component(Component.translatable("worldsharing.menu.kick"), () -> {
-                var in = new TextFieldWidget();
-                in.maximalLength(255);
-                in.setEditable(true);
-                in.placeholder(Component.translatable("worldsharing.menu.reason"));
-                in.setFocused(true);
-                SimpleAdvancedPopup.builder()
-                        .title(Component.translatable("worldsharing.messages.kick", Component.text(p.username)))
-                        .widget(() -> in)
-                        .addButton(SimplePopupButton.create(Component.text("kick"), e -> {
-                            String reason = in.getText();
-                            if (reason.isEmpty()) reason = "You were kicked from the World";
-                            bridge.kickPlayer(p.username, reason);
-                            reloadDashboard();
-                        }))
-                        .build()
-                        .displayAsActivity();
-
-            }));
-            player.addContent(buttons);
-            players.addContent(player);
+        if (addon.sessionHandler.isConnected() || !addon.sessionHandler.players.isEmpty()) {
+            players.addContent(addPlayerOptions(hostPlayer));
+            for (Player p : addon.sessionHandler.players) {
+                players.addContent(addPlayerOptions(p));
+            }
         }
 
         playerManagement.addContent(players);
@@ -204,6 +202,7 @@ public class DashboardActivity extends Activity {
             }
             if (addon.sessionHandler.players.isEmpty()) {
                 addon.sessionHandler.disconnect();
+                reload();
                 return;
             }
             SimpleAdvancedPopup.builder()
@@ -225,7 +224,6 @@ public class DashboardActivity extends Activity {
         btnContainer.addContent(shareButton);
         btnContainer.addContent(closeButton);
         btnContainer.addContent(openToLan);
-
 
         container.addContent(sides);
         container.addContent(btnContainer);
@@ -250,12 +248,70 @@ public class DashboardActivity extends Activity {
 
     private synchronized void init() {
         VersionBridge bridge = VersionStorage.bridge;
+        hostPlayer = new Player(Laby.labyAPI().getName(), null, false, null);
 
         if (bridge.isPublished() || bridge.publishLanWorld(port, bridge.getGameMode(), bridge.cheatsEnabled())) {
+            tempSlots = bridge.getSlots();
             addon.sessionHandler.init();
         } else {
             WorldsharingAddon.LOGGER.warn("failed to publish lan world");
         }
+    }
+
+    private FlexibleContentWidget addPlayerOptions(Player p) {
+        FlexibleContentWidget player = new FlexibleContentWidget();
+        player.addId("player");
+
+        IconWidget headWidget = new IconWidget(Icon.head(p.username));
+        player.addContent(headWidget);
+
+        ComponentWidget title = ComponentWidget.text(p.username + (p.isBedrock ? " (Bedrock)" : ""));
+        player.addContent(title);
+
+        FlexibleContentWidget buttons = new FlexibleContentWidget();
+        buttons.addId("buttons");
+
+        DropdownWidget<GameMode> playerGameMode = new DropdownWidget<>();
+        playerGameMode.addAll(GameMode.values());
+        playerGameMode.setSelected(p.gameMode);
+        playerGameMode.setChangeListener(gameMode -> {
+            p.gameMode = gameMode;
+            VersionStorage.bridge.setPlayerGameMode(p.username, gameMode);
+        });
+
+        buttons.addContent(playerGameMode);
+
+
+        buttons.addContent(ButtonWidget.component(Component.text(p.operator ? "Deop" : "Op"), () -> {
+            VersionStorage.bridge.setOperator(p.username, !p.operator);
+            p.operator = !p.operator;
+            reloadDashboard();
+        }));
+
+        if (!Laby.labyAPI().getName().equals(p.username)) {
+            buttons.addContent(ButtonWidget.component(Component.translatable("worldsharing.menu.kick"), () -> {
+                var in = new TextFieldWidget();
+                in.maximalLength(255);
+                in.setEditable(true);
+                in.placeholder(Component.translatable("worldsharing.menu.reason"));
+                in.setFocused(true);
+                SimpleAdvancedPopup.builder()
+                    .title(Component.translatable("worldsharing.messages.kick", Component.text(p.username)))
+                    .widget(() -> in)
+                    .addButton(SimplePopupButton.create(Component.text("kick"), e -> {
+                        String reason = in.getText();
+                        if (reason.isEmpty()) reason = "You were kicked from the World";
+                        VersionStorage.bridge.kickPlayer(p.username, reason);
+                        reloadDashboard();
+                    }))
+                    .build()
+                    .displayAsActivity();
+            }));
+
+        }
+
+        player.addContent(buttons);
+        return player;
     }
 
     public void reloadDashboard() {
@@ -267,5 +323,4 @@ public class DashboardActivity extends Activity {
             }
         }
     }
-
 }

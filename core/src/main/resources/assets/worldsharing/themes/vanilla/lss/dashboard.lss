@@ -40,7 +40,8 @@
 
 .player-management {
     height: 100%;
-    width: 200;
+    width: 270;
+    min-width: fit-content;
 
     .text {
         alignment-x: center;
@@ -68,12 +69,20 @@
                 height: 16;
                 width: 16;
             }
-
             .buttons {
                 height: 15;
                 width: fit-content;
                 padding-left: 4;
+                orientation: horizontal;
+                space-between-entries: 5;
 
+                Dropdown {
+                    height: 15;
+                    width: fit-content;
+                    Component {
+                        padding: 3;
+                    }
+                }
                 Button {
                     height: 15;
                     width: fit-content;
@@ -116,6 +125,22 @@
     height: fit-content;
     width: fit-content;
     orientation: horizontal;
+
+    .slotscontainer {
+        Slider {
+            min-width: 80;
+            width: fit-content;
+            height: 14;
+        }
+
+        Button {
+            min-width: 30;
+            width: fit-content;
+            height: 14;
+        }
+        orientation: horizontal;
+        space-between-entries: 5;
+    }
 
     .widget {
         min-width: 80;
