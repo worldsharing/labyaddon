@@ -3,7 +3,6 @@ package cc.raynet.worldsharing.protocol.packets;
 import cc.raynet.worldsharing.protocol.PacketBuffer;
 import cc.raynet.worldsharing.protocol.model.Packet;
 import cc.raynet.worldsharing.protocol.model.PacketHandler;
-import cc.raynet.worldsharing.protocol.types.ID;
 
 public class PacketWhitelistRemove extends Packet {
 
@@ -11,11 +10,9 @@ public class PacketWhitelistRemove extends Packet {
     public byte type;
 
     public PacketWhitelistRemove() {
-        super(ID.WHITELIST_REMOVE);
     }
 
     public PacketWhitelistRemove(String username, byte type) {
-        this();
         this.username = username;
         this.type = type;
     }

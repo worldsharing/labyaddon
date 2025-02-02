@@ -3,18 +3,14 @@ package cc.raynet.worldsharing.protocol.packets;
 import cc.raynet.worldsharing.protocol.PacketBuffer;
 import cc.raynet.worldsharing.protocol.model.Packet;
 import cc.raynet.worldsharing.protocol.model.PacketHandler;
-import cc.raynet.worldsharing.protocol.types.ID;
 
 public class PacketEncryptionStart extends Packet {
 
     public String username;
 
-    public PacketEncryptionStart() {
-        super(ID.LOGIN); // double use of ID.LOGIN
-    }
+    public PacketEncryptionStart() {}
 
     public PacketEncryptionStart(String username) {
-        this();
         this.username = username;
     }
 

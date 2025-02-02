@@ -3,11 +3,9 @@ package cc.raynet.worldsharing.protocol;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
 import cc.raynet.worldsharing.protocol.model.Player;
-import cc.raynet.worldsharing.protocol.model.TunnelRequest;
+import cc.raynet.worldsharing.protocol.packets.PacketRequestTunnel;
 import cc.raynet.worldsharing.protocol.proxy.ChannelProxy;
-import cc.raynet.worldsharing.protocol.types.ID;
 import cc.raynet.worldsharing.utils.CryptUtils;
-import cc.raynet.worldsharing.utils.Utils;
 import cc.raynet.worldsharing.utils.VersionStorage;
 import net.labymod.api.util.Pair;
 import net.luminis.quic.QuicClientConnection;
@@ -24,7 +22,7 @@ public class Tunnel {
     private final SessionHandler sessionHandler;
     private final QuicClientConnection connection;
 
-    public Tunnel(SessionHandler sessionHandler, TunnelRequest t) throws Exception {
+    public Tunnel(SessionHandler sessionHandler, PacketRequestTunnel t) throws Exception {
         this.sessionHandler = sessionHandler;
 
         if (sessionHandler.tunnels.containsKey(t.target)) {
@@ -49,8 +47,8 @@ public class Tunnel {
         QuicStream authStream = connection.createStream(true);
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        PacketBuffer.writeVarIntToStream(buffer, PacketBuffer.varIntSize(ID.INIT_QUIC.value) + sessionHandler.tunnelInfo.key.length());
-        PacketBuffer.writeVarIntToStream(buffer, ID.INIT_QUIC.value);
+        PacketBuffer.writeVarIntToStream(buffer, PacketBuffer.varIntSize(26) + sessionHandler.tunnelInfo.key.length());
+        PacketBuffer.writeVarIntToStream(buffer, 26); // QUIC_INIT Packet ID
         buffer.writeBytes(sessionHandler.tunnelInfo.key.getBytes(StandardCharsets.UTF_8));
         buffer.flush();
 
@@ -92,6 +90,7 @@ public class Tunnel {
                 if (VersionStorage.bridge != null) {
                     VersionStorage.bridge.openChannel(new ChannelProxy(stream, () -> {
                         sessionHandler.players.remove(player);
+                        VersionStorage.bridge.setOperator(player.username, false);
                         sessionHandler.addon.dashboardActivity.reloadDashboard();
                     }));
                     sessionHandler.addon.dashboardActivity.reloadDashboard();

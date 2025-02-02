@@ -4,7 +4,6 @@ import cc.raynet.worldsharing.protocol.PacketBuffer;
 import cc.raynet.worldsharing.protocol.model.Packet;
 import cc.raynet.worldsharing.protocol.model.PacketHandler;
 import cc.raynet.worldsharing.protocol.model.TunnelInfo;
-import cc.raynet.worldsharing.protocol.types.ID;
 import cc.raynet.worldsharing.utils.model.WorldVisibility;
 
 public class PacketTunnelInfo extends Packet {
@@ -12,11 +11,10 @@ public class PacketTunnelInfo extends Packet {
     public TunnelInfo tunnelInfo;
 
     public PacketTunnelInfo() {
-        super(ID.TUNNEL_INFO);
+
     }
 
     public PacketTunnelInfo(TunnelInfo tunnelInfo) {
-        this();
         this.tunnelInfo = tunnelInfo;
     }
 

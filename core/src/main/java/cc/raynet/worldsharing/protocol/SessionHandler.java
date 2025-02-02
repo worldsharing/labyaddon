@@ -13,6 +13,7 @@ import cc.raynet.worldsharing.protocol.types.ConnectionState;
 import cc.raynet.worldsharing.utils.AddonMessageUtil;
 import cc.raynet.worldsharing.utils.CryptUtils;
 import cc.raynet.worldsharing.utils.Utils;
+import cc.raynet.worldsharing.utils.VersionBridge;
 import cc.raynet.worldsharing.utils.VersionStorage;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -33,14 +34,15 @@ import net.luminis.quic.QuicClientConnection;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.inject.Singleton;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -52,8 +54,8 @@ public class SessionHandler extends PacketHandler {
             .build());
     private final Protocol protocol;
 
-    public List<Player> players = Collections.synchronizedList(new ArrayList<>());
-    public List<String> whitelistedPlayers = Collections.synchronizedList(new ArrayList<>());
+    public Set<Player> players = Collections.synchronizedSet(new HashSet<>());
+    public Set<String> whitelistedPlayers = Collections.synchronizedSet(new HashSet<>());
 
     public TunnelInfo tunnelInfo;
     public String lastError;
@@ -78,7 +80,7 @@ public class SessionHandler extends PacketHandler {
 
     public void init() {
         if (state != ConnectionState.DISCONNECTED) {
-            WorldsharingAddon.LOGGER.warn("Already connected or connecting.");
+            WorldsharingAddon.LOGGER.debug("Already connected or connecting.");
             shutdown();
             return;
         }
@@ -97,13 +99,14 @@ public class SessionHandler extends PacketHandler {
     }
 
     public void disconnect() {
-        if (VersionStorage.bridge != null) {
-            for (Player player : players) {
-                VersionStorage.bridge.kickPlayer(player.username, "Host stopped sharing");
-            }
-            VersionStorage.bridge.stopServer();
-        }
         disconnect(null);
+        VersionBridge bridge = VersionStorage.bridge;
+        if (bridge != null) {
+            for (Player player : players) {
+                bridge.kickPlayer(player.username, "Host stopped sharing");
+            }
+            bridge.stopServer();
+        }
     }
 
     public void disconnect(String error) {
@@ -214,14 +217,14 @@ public class SessionHandler extends PacketHandler {
 
     @Override
     public void handle(PacketRequestTunnel rt) {
-        if (tunnels.containsKey(rt.tunnelRequest.target)) {
-            if (Boolean.FALSE.equals(tunnels.get(rt.tunnelRequest.target).getSecond())) {
+        if (tunnels.containsKey(rt.target)) {
+            if (Boolean.FALSE.equals(tunnels.get(rt.target).getSecond())) {
                 return;
             }
         }
         Thread.ofVirtual().start(() -> {
             try {
-                new Tunnel(this, rt.tunnelRequest);
+                new Tunnel(this, rt);
             } catch (Exception e) {
                 lastError = "failed to create tunnel: " + e.getCause().getMessage();
                 addon.logger().error(lastError);

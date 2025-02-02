@@ -23,7 +23,7 @@ public class ChannelHandler extends ChannelInitializer<NioSocketChannel> {
                 .addLast("splitter", new PacketPrepender())
                 .addLast("decoder", new PacketDecoder(this.sessionHandler))
                 .addLast("prepender", new PacketSplitter())
-                .addLast("encoder", new PacketEncoder())
+                .addLast("encoder", new PacketEncoder(this.sessionHandler))
                 .addLast(this.sessionHandler);
     }
 

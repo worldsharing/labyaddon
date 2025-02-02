@@ -4,7 +4,6 @@ import cc.raynet.worldsharing.WorldsharingAddon;
 import cc.raynet.worldsharing.protocol.PacketBuffer;
 import cc.raynet.worldsharing.protocol.SessionHandler;
 import cc.raynet.worldsharing.protocol.model.Packet;
-import cc.raynet.worldsharing.protocol.types.ID;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -27,8 +26,8 @@ public class PacketDecoder extends ByteToMessageDecoder {
             if (packet == null) {
                 return;
             }
-            if (packet.getID() != ID.PING.value && packet.getID() != ID.PONG.value) {
-                WorldsharingAddon.LOGGER.debug("[CONTROL] [IN] " + packet.getID() + " " + packet.getClass()
+            if (id != 5 && id != 6) {
+                WorldsharingAddon.LOGGER.debug("[CONTROL] [IN] " + id + " " + packet.getClass()
                         .getSimpleName());
             }
 

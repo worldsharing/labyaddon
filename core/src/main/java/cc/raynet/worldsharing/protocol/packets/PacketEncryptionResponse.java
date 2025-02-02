@@ -3,7 +3,6 @@ package cc.raynet.worldsharing.protocol.packets;
 import cc.raynet.worldsharing.protocol.PacketBuffer;
 import cc.raynet.worldsharing.protocol.model.Packet;
 import cc.raynet.worldsharing.protocol.model.PacketHandler;
-import cc.raynet.worldsharing.protocol.types.ID;
 
 public class PacketEncryptionResponse extends Packet {
 
@@ -14,7 +13,6 @@ public class PacketEncryptionResponse extends Packet {
     }
 
     public PacketEncryptionResponse(byte[] verifyToken) {
-        super(ID.ENCRYPTION_RESPONSE);
         this.verifyToken = verifyToken;
     }
 

@@ -3,17 +3,12 @@ package cc.raynet.worldsharing.protocol.packets;
 import cc.raynet.worldsharing.protocol.PacketBuffer;
 import cc.raynet.worldsharing.protocol.model.Packet;
 import cc.raynet.worldsharing.protocol.model.PacketHandler;
-import cc.raynet.worldsharing.protocol.types.ID;
 
 public class PacketEncryptionRequest extends Packet {
 
     public String serverID;
     public byte[] publicKey;
     public byte[] verifyToken;
-
-    public PacketEncryptionRequest() {
-        super(ID.ENCRYPTION_REQUEST);
-    }
 
     @Override
     public void read(PacketBuffer buf) {

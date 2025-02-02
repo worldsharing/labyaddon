@@ -3,7 +3,6 @@ package cc.raynet.worldsharing.protocol.packets;
 import cc.raynet.worldsharing.protocol.PacketBuffer;
 import cc.raynet.worldsharing.protocol.model.Packet;
 import cc.raynet.worldsharing.protocol.model.PacketHandler;
-import cc.raynet.worldsharing.protocol.types.ID;
 
 public class PacketSharedSecret extends Packet {
 
@@ -14,7 +13,6 @@ public class PacketSharedSecret extends Packet {
     }
 
     public PacketSharedSecret(byte[] encryptedSharedSecret) {
-        super(ID.SHARED_SECRET);
         this.encryptedSharedSecret = encryptedSharedSecret;
     }
 

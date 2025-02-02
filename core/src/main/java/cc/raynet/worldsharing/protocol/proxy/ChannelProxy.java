@@ -39,8 +39,7 @@ public class ChannelProxy extends ChannelInboundHandlerAdapter {
 
                     ctx.writeAndFlush(ctx.alloc().buffer(1).writeByte(data));
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
             } finally {
                 ctx.close();
                 closeCallback.run();
@@ -56,8 +55,7 @@ public class ChannelProxy extends ChannelInboundHandlerAdapter {
                     dataOutputStream.write(buf.readByte());
                 }
                 dataOutputStream.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
             } finally {
                 buf.release();
             }
