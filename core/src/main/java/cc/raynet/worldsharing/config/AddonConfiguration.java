@@ -35,12 +35,6 @@ public class AddonConfiguration extends AddonConfig {
 
     @MethodOrder(after = "debug")
     @ButtonSetting
-    public void joinDiscordServer(Setting setting) {
-        Laby.references().chatExecutor().openUrl("https://" + WorldsharingAddon.GATEWAY_DOMAIN + "/dc");
-    }
-
-    @MethodOrder(after = "debug")
-    @ButtonSetting
     public void clearCache(Setting setting) {
         WorldsharingAddon.INSTANCE.api.pings.clear();
     }

@@ -35,7 +35,7 @@ public class APIHandler {
     }
 
     public static InetAddress getClosestNode(InetAddress address) {
-        if (!Utils.isLanWorldDomain(address.getHostName())) {
+        if (!WorldsharingAddon.INSTANCE.configuration().enabled().get() || !Utils.isLanWorldDomain(address.getHostName())) {
             return address;
         }
         return WorldsharingAddon.INSTANCE.api.getClosestNode2(address);
@@ -57,7 +57,7 @@ public class APIHandler {
             pings = calculatePings();
             addon.nodes = getNodes();
         } catch (Exception e) {
-            WorldsharingAddon.LOGGER.debug("API Handler init failed", e.getMessage());
+            WorldsharingAddon.LOGGER.debug("API Handler init failed", e.getCause());
         }
     }
 
