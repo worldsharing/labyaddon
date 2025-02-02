@@ -1,12 +1,10 @@
 package cc.raynet.worldsharing.v1_21_3.mixins;
 
 import cc.raynet.worldsharing.utils.Utils;
-import net.minecraft.network.protocol.common.custom.BrandPayload;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(ServerConfigurationPacketListenerImpl.class)
 public class MixinServerBrand {

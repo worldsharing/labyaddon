@@ -10,6 +10,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.local.LocalChannel;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerConnectionListener;
@@ -37,19 +38,30 @@ public class VersionBridgeImpl implements VersionBridge {
 
     @Override
     public boolean publishLanWorld(int port, GameMode gamemode, boolean allowCheats) {
-        return Minecraft.getInstance()
-                .getSingleplayerServer()
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return false;
+        }
+        return server
                 .publishServer(GameType.byId(gamemode.getId()), allowCheats, port);
     }
 
     @Override
     public String getWorldName() {
-        return Minecraft.getInstance().getSingleplayerServer().getWorldData().getLevelName();
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return "";
+        }
+        return server.getWorldData().getLevelName();
     }
 
     @Override
     public boolean isPublished() {
-        return Minecraft.getInstance().getSingleplayerServer().isPublished();
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return false;
+        }
+        return server.isPublished();
     }
 
     @Override
@@ -57,23 +69,38 @@ public class VersionBridgeImpl implements VersionBridge {
         if (!isPublished()) {
             return;
         }
-        Minecraft.getInstance().getSingleplayerServer().setDefaultGameType(GameType.byId(gameMode.getId()));
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return;
+        }
+        server.setDefaultGameType(GameType.byId(gameMode.getId()));
     }
 
     @Override
     public GameMode getGameMode() {
-        return GameMode.fromId(Minecraft.getInstance().getSingleplayerServer().getDefaultGameType().getId());
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return null;
+        }
+        return GameMode.fromId(server.getDefaultGameType().getId());
     }
 
     @Override
     public void changeDifficulty(GameDifficulty difficulty) {
-        Minecraft.getInstance().getSingleplayerServer().setDifficulty(Difficulty.byId(difficulty.getId()), true);
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return;
+        }
+        server.setDifficulty(Difficulty.byId(difficulty.getId()), true);
     }
 
     @Override
     public GameDifficulty getDifficulty() {
-        return GameDifficulty.fromId(Minecraft.getInstance()
-                .getSingleplayerServer()
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return null;
+        }
+        return GameDifficulty.fromId(server
                 .getWorldData()
                 .getDifficulty()
                 .getId());
@@ -81,12 +108,20 @@ public class VersionBridgeImpl implements VersionBridge {
 
     @Override
     public boolean cheatsEnabled() {
-        return Minecraft.getInstance().getSingleplayerServer().getPlayerList().isAllowCheatsForAllPlayers();
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return false;
+        }
+        return server.getPlayerList().isAllowCheatsForAllPlayers();
     }
 
     @Override
     public void setCheatsEnabled(boolean enabled) {
-        PlayerList playerList = Minecraft.getInstance().getSingleplayerServer().getPlayerList();
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return;
+        }
+        PlayerList playerList = server.getPlayerList();
         playerList.setAllowCheatsForAllPlayers(enabled);
         for (var pl : playerList.getPlayers()) {
             playerList.sendPlayerPermissionLevel(pl);
@@ -95,24 +130,88 @@ public class VersionBridgeImpl implements VersionBridge {
 
     @Override
     public void kickPlayer(String name, String reason) {
-        ServerPlayer profile = Minecraft.getInstance().getSingleplayerServer().getPlayerList().getPlayerByName(name);
-        if (profile == null) return;
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return;
+        }
+        ServerPlayer profile = server.getPlayerList().getPlayerByName(name);
+        if (profile == null) {
+            return;
+        }
         profile.connection.disconnect(Component.nullToEmpty(reason));
     }
 
     @Override
     public int getSlots() {
-        return Minecraft.getInstance().getSingleplayerServer().getPlayerList().maxPlayers;
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return 0;
+        }
+        return server.getPlayerList().maxPlayers;
     }
 
     @Override
     public void setSlots(int slots) {
-        Minecraft.getInstance().getSingleplayerServer().getPlayerList().maxPlayers = slots;
+        IntegratedServer server = getServer();
+        if (server != null) {
+            server.getPlayerList().maxPlayers = slots;
+        }
     }
 
     @Override
     public void stopServer() {
-        Minecraft.getInstance().getSingleplayerServer().getConnection().stop();
-        Minecraft.getInstance().getSingleplayerServer().publishedPort = -1;
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return;
+        }
+        server.getConnection().stop();
+        server.publishedPort = -1;
+    }
+
+    @Override
+    public GameMode getPlayerGameMode(String username) {
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return null;
+        }
+        ServerPlayer player = server.getPlayerList().getPlayerByName(username);
+        if (player == null) {
+            return null;
+        }
+        return GameMode.fromId(player.gameMode.getGameModeForPlayer().getId());
+    }
+
+    @Override
+    public void setPlayerGameMode(String username, GameMode gameMode) {
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return;
+        }
+        ServerPlayer player = server.getPlayerList().getPlayerByName(username);
+        if (player == null) {
+            return;
+        }
+
+        player.setGameMode(GameType.byId(gameMode.getId()));
+    }
+
+    @Override
+    public void setOperator(String username, boolean op) {
+        IntegratedServer server = getServer();
+        if (server == null) {
+            return;
+        }
+        ServerPlayer player = server.getPlayerList().getPlayerByName(username);
+        if (player != null) {
+            if (op) {
+                server.getPlayerList().op(player.getGameProfile());
+            } else {
+                server.getPlayerList().deop(player.getGameProfile());
+            }
+        }
+    }
+
+    private IntegratedServer getServer() {
+        return Minecraft.getInstance().getSingleplayerServer();
     }
 }

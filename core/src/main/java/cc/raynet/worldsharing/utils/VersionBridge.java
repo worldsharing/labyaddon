@@ -36,4 +36,10 @@ public interface VersionBridge {
 
     void stopServer();
 
+    GameMode getPlayerGameMode(String username);
+
+    void setPlayerGameMode(String username, GameMode gameMode);
+
+    void setOperator(String username, boolean op);
+
 }

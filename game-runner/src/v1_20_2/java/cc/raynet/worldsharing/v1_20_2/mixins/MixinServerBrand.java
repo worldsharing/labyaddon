@@ -1,7 +1,6 @@
 package cc.raynet.worldsharing.v1_20_2.mixins;
 
 import cc.raynet.worldsharing.utils.Utils;
-import net.minecraft.network.protocol.common.custom.BrandPayload;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
