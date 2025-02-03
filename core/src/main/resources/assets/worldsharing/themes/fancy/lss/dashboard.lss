@@ -1,0 +1,168 @@
+.container {
+  width: 350;
+  height: fit-content;
+  min-width: fit-content;
+  min-height: fit-content;
+  min-width: fit-content;
+  min-height: fit-content;
+
+  alignment-x: center;
+  alignment-y: center;
+  space-between-entries: 5;
+
+  filter: blur(25);
+  border-radius: 15;
+  border-thickness: 5;
+  border-color: var(--background-color-border);
+  background-color: var(--background-color);
+  box-shadow: none;
+  padding: 10 10 10 10;
+
+  .title {
+    width: fit-content;
+    height: fit-content;
+    font-size: 1;
+  }
+  .info {
+      width: fit-content;
+      alignment-x: center;
+  }
+
+  .sides {
+    width: fit-content;
+    height: fit-content;
+    space-between-entries: 15;
+    orientation: horizontal;
+
+    Hr {
+        width: 0.5;
+        height: 100%;
+        opacity: 0.0;
+    }
+  }
+}
+
+
+.player-management {
+    height: 100%;
+    width: 270;
+    min-width: fit-content;
+
+    border-radius: 5;
+    border-thickness: 1.5;
+    border-color: dark_gray;
+
+    .text {
+        alignment-x: center;
+    }
+
+    space-between-entries: 1;
+
+    .players {
+        height: 100;
+        width: 100%;
+
+        space-between-entries: 7;
+        .player {
+            height: fit-content;
+            width: fit-content;
+
+            orientation: horizontal;
+
+            Component {
+                padding-top: 2;
+                padding-left: 4;
+            }
+
+            Icon {
+                height: 16;
+                width: 16;
+            }
+            .buttons {
+                height: 15;
+                width: fit-content;
+                padding-left: 4;
+                orientation: horizontal;
+                space-between-entries: 5;
+
+                Dropdown {
+                    height: 15;
+                    width: fit-content;
+                    Component {
+                        padding: 3;
+                    }
+                }
+                Button {
+                    height: 15;
+                    width: fit-content;
+                    Component {
+                        padding: 3;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.button-container {
+    height: fit-content;
+    width: fit-content;
+    alignment-x: center;
+    space-between-entries: 10;
+
+    orientation: horizontal;
+
+    Button {
+        height: 15;
+        min-width: 50;
+        width: fit-content;
+        alignment-x: center;
+    }
+
+}
+
+
+.options {
+    width: 160;
+    height: fit-content;
+    padding: 10 3 10 3;
+    space-between-entries: 5;
+
+    border-radius: 5;
+    border-thickness: 1.5;
+    border-color: dark_gray;
+}
+
+.option {
+    height: fit-content;
+    width: 100%;
+    top: 0;
+    left: 0;
+    layout: spread;
+
+    .slotscontainer {
+        Slider {
+            min-width: 80;
+            width: fit-content;
+            height: 14;
+        }
+
+        Button {
+            min-width: 30;
+            width: fit-content;
+            height: 14;
+        }
+        orientation: horizontal;
+        space-between-entries: 5;
+    }
+
+    .widget {
+        min-width: 80;
+        width: fit-content;
+        height: 14;
+    }
+
+    .label {
+        margin-top: 2;
+    }
+}
