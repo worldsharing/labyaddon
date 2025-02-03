@@ -10,10 +10,13 @@
   alignment-y: center;
   space-between-entries: 5;
 
-  border: 1 white;
-  padding: 15;
-  margin: 0 0 10 0;
-  background-color: rgba(0, 0, 0, 200);
+  filter: blur(25);
+  border-radius: 15;
+  border-thickness: 5;
+  border-color: var(--background-color-border);
+  background-color: var(--background-color);
+  box-shadow: none;
+  padding: 10 10 10 10;
 
   .title {
     width: fit-content;
@@ -34,6 +37,7 @@
     Hr {
         width: 0.5;
         height: 100%;
+        opacity: 0.0;
     }
   }
 }
@@ -43,7 +47,10 @@
     height: 100%;
     width: 270;
     min-width: fit-content;
-    border: 1 dark_gray;
+
+    border-radius: 5;
+    border-thickness: 1.5;
+    border-color: dark_gray;
 
     .text {
         alignment-x: center;
@@ -53,12 +60,12 @@
     space-between-entries: 1;
 
     .players-scroll {
-        height: 87%;
+        height: 85%;
         width: 100%;
         margin: 0 5 0 5;
 
         Scrollbar {
-            width: 3;
+            width: 5;
         }
 
     }
@@ -132,18 +139,21 @@
     height: fit-content;
     padding: 10 3 10 3;
     space-between-entries: 5;
-    border: 1 dark_gray;
+
+    border-radius: 5;
+    border-thickness: 1.5;
+    border-color: dark_gray;
 }
 
 .option {
     height: fit-content;
     width: 100%;
-    padding: 0 0 0 10;
+    padding: 0 1 0 10;
     layout: spread;
 
     .slotscontainer {
         Slider {
-            min-width: 62;
+            min-width: 70;
             width: fit-content;
             height: 14;
         }

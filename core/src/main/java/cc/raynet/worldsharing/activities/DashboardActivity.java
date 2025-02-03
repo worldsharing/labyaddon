@@ -26,11 +26,13 @@ import net.labymod.api.client.gui.screen.widget.widgets.input.SwitchWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.input.TextFieldWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.input.dropdown.DropdownWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.layout.FlexibleContentWidget;
+import net.labymod.api.client.gui.screen.widget.widgets.layout.ScrollWidget;
+import net.labymod.api.client.gui.screen.widget.widgets.layout.list.HorizontalListWidget;
+import net.labymod.api.client.gui.screen.widget.widgets.layout.list.VerticalListWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.popup.SimpleAdvancedPopup;
 import net.labymod.api.client.gui.screen.widget.widgets.popup.SimpleAdvancedPopup.SimplePopupButton;
 import net.labymod.api.client.gui.screen.widget.widgets.renderer.HrWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.renderer.IconWidget;
-import net.labymod.api.labyconnect.LabyConnectSession;
 
 
 @AutoActivity
@@ -111,7 +113,7 @@ public class DashboardActivity extends Activity {
         maxSlotsContainer.addId("slotscontainer");
 
         // Port Input
-        TextFieldWidget portInput = new TextFieldWidget();
+        TextFieldWidget portInput = new TextFieldWidget().addId("port-input");
         portInput.placeholder(Component.translatable("worldsharing.menu.dashboard.port"));
         portInput.updateListener(e -> port = e.isEmpty() ? 0 : Integer.parseInt(e));
         portInput.maximalLength(5);
@@ -168,17 +170,15 @@ public class DashboardActivity extends Activity {
         playerManagement.addContent(ComponentWidget.component(addon.sessionHandler.players.isEmpty() ? Component.translatable("worldsharing.messages.empty_world") : Component.translatable("worldsharing.messages.world_player_count", Component.text(addon.sessionHandler.players.size()+1)))
                 .addId("text"));
 
-        FlexibleContentWidget players = new FlexibleContentWidget();
-        players.addId("players");
+        VerticalListWidget<Widget> playerList = new VerticalListWidget<>().addId("players");
 
         if (addon.sessionHandler.isConnected() || !addon.sessionHandler.players.isEmpty()) {
-            players.addContent(addPlayerOptions(hostPlayer));
             for (Player p : addon.sessionHandler.players) {
-                players.addContent(addPlayerOptions(p));
+                playerList.addChild(addPlayerOptions(p));
             }
         }
 
-        playerManagement.addContent(players);
+        playerManagement.addContent(new ScrollWidget(playerList).addId("players-scroll"));
 
         sides.addContent(playerManagement);
 
@@ -235,13 +235,13 @@ public class DashboardActivity extends Activity {
     }
 
     private void addOption(Component component, Widget widget) {
-        FlexibleContentWidget container = new FlexibleContentWidget();
+        HorizontalListWidget container = new HorizontalListWidget();
         container.addId("option");
 
-        container.addContent(ComponentWidget.component(component).addId("label"));
+        container.addEntry(ComponentWidget.component(component).addId("label"));
         if (widget != null) {
             widget.addId("widget");
-            container.addContent(widget);
+            container.addEntry(widget);
         }
         options.addContent(container);
     }
