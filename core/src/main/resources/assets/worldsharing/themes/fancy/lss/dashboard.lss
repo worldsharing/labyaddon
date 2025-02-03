@@ -54,12 +54,24 @@
 
     .text {
         alignment-x: center;
+        margin: 2 0 5 0;
     }
 
     space-between-entries: 1;
 
+    .players-scroll {
+        height: 85%;
+        width: 100%;
+        margin: 0 5 0 5;
+
+        Scrollbar {
+            width: 5;
+        }
+
+    }
+
     .players {
-        height: 100;
+        height: fit-content;
         width: 100%;
 
         space-between-entries: 7;
@@ -123,7 +135,7 @@
 
 
 .options {
-    width: 160;
+    width: 210;
     height: fit-content;
     padding: 10 3 10 3;
     space-between-entries: 5;
@@ -136,13 +148,12 @@
 .option {
     height: fit-content;
     width: 100%;
-    top: 0;
-    left: 0;
+    padding: 0 1 0 10;
     layout: spread;
 
     .slotscontainer {
         Slider {
-            min-width: 80;
+            min-width: 70;
             width: fit-content;
             height: 14;
         }
@@ -157,7 +168,7 @@
     }
 
     .widget {
-        min-width: 80;
+        min-width: 110;
         width: fit-content;
         height: 14;
     }
@@ -165,4 +176,9 @@
     .label {
         margin-top: 2;
     }
+
+    .port-input {
+        min-width: 100 !important;
+    }
+
 }
