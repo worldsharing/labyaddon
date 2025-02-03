@@ -10,9 +10,10 @@
   alignment-y: center;
   space-between-entries: 5;
 
-  border: 1 black;
+  border: 1 white;
   padding: 15;
   margin: 0 0 10 0;
+  background-color: rgba(0, 0, 0, 200);
 
   .title {
     width: fit-content;
@@ -42,6 +43,7 @@
     height: 100%;
     width: 270;
     min-width: fit-content;
+    border: 1 dark_gray;
 
     .text {
         alignment-x: center;
@@ -114,17 +116,19 @@
 
 
 .options {
-    width: fit-content;
+    width: 160;
     height: fit-content;
-    padding: 10 3;
+    padding: 10 3 10 3;
     space-between-entries: 5;
+    border: 1 dark_gray;
 }
 
 .option {
-    space-between-entries: 10;
     height: fit-content;
-    width: fit-content;
-    orientation: horizontal;
+    width: 100%;
+    top: 0;
+    left: 0;
+    layout: spread;
 
     .slotscontainer {
         Slider {

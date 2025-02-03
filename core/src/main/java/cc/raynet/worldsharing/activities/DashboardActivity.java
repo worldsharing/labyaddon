@@ -20,12 +20,14 @@ import net.labymod.api.client.gui.screen.activity.AutoActivity;
 import net.labymod.api.client.gui.screen.activity.Link;
 import net.labymod.api.client.gui.screen.widget.Widget;
 import net.labymod.api.client.gui.screen.widget.widgets.ComponentWidget;
+import net.labymod.api.client.gui.screen.widget.widgets.DivWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.input.ButtonWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.input.SliderWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.input.SwitchWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.input.TextFieldWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.input.dropdown.DropdownWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.layout.FlexibleContentWidget;
+import net.labymod.api.client.gui.screen.widget.widgets.layout.list.HorizontalListWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.popup.SimpleAdvancedPopup;
 import net.labymod.api.client.gui.screen.widget.widgets.popup.SimpleAdvancedPopup.SimplePopupButton;
 import net.labymod.api.client.gui.screen.widget.widgets.renderer.HrWidget;
@@ -235,13 +237,13 @@ public class DashboardActivity extends Activity {
     }
 
     private void addOption(Component component, Widget widget) {
-        FlexibleContentWidget container = new FlexibleContentWidget();
+        HorizontalListWidget container = new HorizontalListWidget();
         container.addId("option");
 
-        container.addContent(ComponentWidget.component(component).addId("label"));
+        container.addEntry(ComponentWidget.component(component).addId("label"));
         if (widget != null) {
             widget.addId("widget");
-            container.addContent(widget);
+            container.addEntry(widget);
         }
         options.addContent(container);
     }
