@@ -1,6 +1,6 @@
 package cc.raynet.worldsharing.v1_12_2.mixins;
 
-import cc.raynet.worldsharing.api.APIHandler;
+import cc.raynet.worldsharing.api.API;
 import cc.raynet.worldsharing.utils.VersionStorage;
 import io.netty.channel.Channel;
 import net.minecraft.network.NetworkManager;
@@ -22,7 +22,7 @@ public class MixinConnection {
 
     @ModifyArg(method = "createNetworkManagerAndConnect", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;connect(Ljava/net/InetAddress;I)Lio/netty/channel/ChannelFuture;"), index = 0)
     private static InetAddress spoofHostname(InetAddress inetHost) {
-        return APIHandler.getClosestNode(inetHost);
+        return API.getClosestNode(inetHost);
     }
 
     @Inject(method = "isLocalChannel", at = @At("HEAD"), cancellable = true)

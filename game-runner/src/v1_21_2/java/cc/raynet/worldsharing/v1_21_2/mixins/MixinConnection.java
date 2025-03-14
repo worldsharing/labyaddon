@@ -1,6 +1,6 @@
 package cc.raynet.worldsharing.v1_21_2.mixins;
 
-import cc.raynet.worldsharing.api.APIHandler;
+import cc.raynet.worldsharing.api.API;
 import cc.raynet.worldsharing.utils.VersionStorage;
 import io.netty.channel.Channel;
 import net.minecraft.network.Connection;
@@ -23,7 +23,7 @@ public class MixinConnection {
 
     @Redirect(method = "connect", at = @At(value = "INVOKE", target = "Ljava/net/InetSocketAddress;getAddress()Ljava/net/InetAddress;"))
     private static InetAddress spoofHostname(InetSocketAddress instance) {
-        return APIHandler.getClosestNode(instance.getAddress());
+        return API.getClosestNode(instance.getAddress());
     }
 
     @Inject(method = "isMemoryConnection", at = @At("HEAD"), cancellable = true)

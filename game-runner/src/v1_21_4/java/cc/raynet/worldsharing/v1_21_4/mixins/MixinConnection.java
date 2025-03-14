@@ -1,6 +1,6 @@
 package cc.raynet.worldsharing.v1_21_4.mixins;
 
-import cc.raynet.worldsharing.api.APIHandler;
+import cc.raynet.worldsharing.api.API;
 import cc.raynet.worldsharing.utils.VersionStorage;
 import cc.raynet.worldsharing.v1_21_4.client.PropertyStorage;
 import com.mojang.authlib.properties.Property;
@@ -29,7 +29,7 @@ public class MixinConnection implements PropertyStorage {
 
     @Redirect(method = "connect", at = @At(value = "INVOKE", target = "Ljava/net/InetSocketAddress;getAddress()Ljava/net/InetAddress;"))
     private static InetAddress spoofHostname(InetSocketAddress instance) {
-        return APIHandler.getClosestNode(instance.getAddress());
+        return API.getClosestNode(instance.getAddress());
     }
 
     @Inject(method = "isMemoryConnection", at = @At("HEAD"), cancellable = true)

@@ -1,6 +1,7 @@
 package cc.raynet.worldsharing.config;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
+import cc.raynet.worldsharing.api.API;
 import net.labymod.api.Textures.SpriteCommon;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.gui.lss.property.annotation.AutoWidget;
@@ -35,7 +36,7 @@ public class NodeSelection extends FlexibleContentWidget {
 
         ButtonWidget refreshButton = ButtonWidget.icon(SpriteCommon.REFRESH);
         refreshButton.addId("refresh-button");
-        refreshButton.setPressable(() -> Thread.ofVirtual().start(() -> addon.api.init()));
+        refreshButton.setPressable(() -> Thread.ofVirtual().start(() -> API.init()));
         refreshButton.setHoverComponent(Component.translatable("labymod.ui.button.refresh"));
 
 
@@ -43,16 +44,16 @@ public class NodeSelection extends FlexibleContentWidget {
         dropdownWidget.add("auto");
         dropdownWidget.addAll(WorldsharingAddon.INSTANCE.nodes.keySet());
 
-        dropdownWidget.setSelected(addon.api.selectedNode == null ? "auto" : addon.api.selectedNode.getFirst());
+        dropdownWidget.setSelected(API.selectedNode == null ? "auto" : API.selectedNode.getFirst());
         dropdownWidget.setChangeListener(e -> {
             if ("auto".equals(e)) {
-                addon.api.selectedNode = null;
+                API.selectedNode = null;
                 return;
             }
 
             for (var entry : addon.nodes.entrySet()) {
                 if (entry.getKey().equals(e)) {
-                    addon.api.selectedNode = Pair.of(entry.getKey(), entry.getValue());
+                    API.selectedNode = Pair.of(entry.getKey(), entry.getValue());
                     break;
                 }
             }

@@ -1,6 +1,7 @@
 package cc.raynet.worldsharing.protocol;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
+import cc.raynet.worldsharing.api.API;
 import cc.raynet.worldsharing.protocol.model.Packet;
 import cc.raynet.worldsharing.protocol.model.PacketHandler;
 import cc.raynet.worldsharing.protocol.model.Player;
@@ -30,6 +31,7 @@ import net.labymod.api.concurrent.ThreadFactoryBuilder;
 import net.labymod.api.util.Pair;
 import net.labymod.api.util.io.web.exception.WebRequestException;
 import net.luminis.quic.QuicClientConnection;
+import org.jetbrains.annotations.Nullable;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -58,7 +60,7 @@ public class SessionHandler extends PacketHandler {
     public Set<String> whitelistedPlayers = Collections.synchronizedSet(new HashSet<>());
 
     public TunnelInfo tunnelInfo;
-    public String lastError;
+    @Nullable public String lastError;
     public Map<String, Pair<QuicClientConnection, Boolean>> tunnels = new ConcurrentHashMap<>();
     private ChannelHandler channelHandler = null;
     private ConnectionState state;
@@ -107,6 +109,7 @@ public class SessionHandler extends PacketHandler {
             }
             bridge.stopServer();
         }
+        players.clear();
     }
 
     public void disconnect(String error) {
@@ -133,7 +136,6 @@ public class SessionHandler extends PacketHandler {
         tunnelInfo.key = "";
         tunnelInfo.hostname = "";
         whitelistedPlayers.clear();
-        addon.dashboardActivity.reloadDashboard();
         if (!tunnels.isEmpty()) {
             tunnels.forEach((e, v) -> v.setSecond(Boolean.TRUE));
         }
@@ -161,7 +163,7 @@ public class SessionHandler extends PacketHandler {
 
         byte[] sharedSecret = Utils.randomString(16).getBytes(StandardCharsets.UTF_8);
 
-        sendPacket(new PacketSharedSecret(CryptUtils.encryptWithPublicKey(sharedSecret, addon.api.getPublicKey())));
+        sendPacket(new PacketSharedSecret(CryptUtils.encryptWithPublicKey(sharedSecret, API.getPublicKey())));
 
         SecretKeySpec secretKey = new SecretKeySpec(sharedSecret, "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(sharedSecret);
@@ -226,7 +228,7 @@ public class SessionHandler extends PacketHandler {
             try {
                 new Tunnel(this, rt);
             } catch (Exception e) {
-                lastError = "failed to create tunnel: " + e.getCause().getMessage();
+                lastError = "failed to create tunnel: " + e.getCause() == null ? e.getMessage() :  e.getCause().getMessage();
                 addon.logger().error(lastError);
             }
         });
