@@ -94,7 +94,7 @@ public class DashboardActivity extends Activity {
             } else {
                 bridge.setSlots((int) val);
             }
-        }).range(2, (Laby.labyAPI().labyConnect().getSession() == null ? 12 : (Laby.labyAPI().labyConnect().getSession().self().isLabyPlus() ? 32 : 12)));
+        }).range(2, (Laby.labyAPI().labyConnect().getSession() == null ? 12 : (Laby.labyAPI().labyConnect().getSession().self().gameUser().visibleGroup().isDefault() ? 12 : 32)));
         maxSlotsSlider.setValue(addon.sessionHandler.isConnected() ? tempSlots : bridge.getSlots());
 
 
@@ -173,6 +173,7 @@ public class DashboardActivity extends Activity {
         VerticalListWidget<Widget> playerList = new VerticalListWidget<>().addId("players");
 
         if (addon.sessionHandler.isConnected() || !addon.sessionHandler.players.isEmpty()) {
+            playerList.addChild(addPlayerOptions(hostPlayer));
             for (Player p : addon.sessionHandler.players) {
                 playerList.addChild(addPlayerOptions(p));
             }
@@ -217,7 +218,9 @@ public class DashboardActivity extends Activity {
         openToLan.text().set(Component.translatable("menu.shareToLan"));
         openToLan.setEnabled(!bridge.isPublished());
         openToLan.setActionListener(() -> {
-            bridge.publishLanWorld(port, bridge.getGameMode(), bridge.cheatsEnabled());
+            if (!bridge.publishLanWorld(port, bridge.getGameMode(), bridge.cheatsEnabled())) {
+                port = bridge.getSuitableLanPort();
+            }
             reload();
         });
 
@@ -249,12 +252,14 @@ public class DashboardActivity extends Activity {
     private synchronized void init() {
         VersionBridge bridge = VersionStorage.bridge;
         hostPlayer = new Player(Laby.labyAPI().getName(), null, false, null);
+        hostPlayer.gameMode = bridge.getPlayerGameMode(hostPlayer.username);
 
         if (bridge.isPublished() || bridge.publishLanWorld(port, bridge.getGameMode(), bridge.cheatsEnabled())) {
             tempSlots = bridge.getSlots();
             addon.sessionHandler.init();
         } else {
             WorldsharingAddon.LOGGER.warn("failed to publish lan world");
+            port = bridge.getSuitableLanPort();
         }
     }
 
@@ -281,7 +286,6 @@ public class DashboardActivity extends Activity {
 
         buttons.addContent(playerGameMode);
 
-
         buttons.addContent(ButtonWidget.component(Component.text(p.operator ? "Deop" : "Op"), () -> {
             VersionStorage.bridge.setOperator(p.username, !p.operator);
             p.operator = !p.operator;
@@ -298,7 +302,7 @@ public class DashboardActivity extends Activity {
                 SimpleAdvancedPopup.builder()
                     .title(Component.translatable("worldsharing.messages.kick", Component.text(p.username)))
                     .widget(() -> in)
-                    .addButton(SimplePopupButton.create(Component.text("kick"), e -> {
+                    .addButton(SimplePopupButton.create(Component.translatable("worldsharing.menu.kick"), e -> {
                         String reason = in.getText();
                         if (reason.isEmpty()) reason = "You were kicked from the World";
                         VersionStorage.bridge.kickPlayer(p.username, reason);

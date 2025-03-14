@@ -1,10 +1,11 @@
 package cc.raynet.worldsharing;
 
 import cc.raynet.worldsharing.activities.DashboardActivity;
-import cc.raynet.worldsharing.api.APIHandler;
+import cc.raynet.worldsharing.api.API;
 import cc.raynet.worldsharing.command.DebugCommand;
 import cc.raynet.worldsharing.command.WhitelistCommand;
 import cc.raynet.worldsharing.config.AddonConfiguration;
+import cc.raynet.worldsharing.interaction.KickBulletPoint;
 import cc.raynet.worldsharing.navigation.NavigationElement;
 import cc.raynet.worldsharing.protocol.SessionHandler;
 import io.sentry.Sentry;
@@ -29,7 +30,6 @@ public class WorldsharingAddon extends LabyAddon<AddonConfiguration> {
 
     public SessionHandler sessionHandler;
     public DashboardActivity dashboardActivity;
-    public APIHandler api;
 
     public Map<String, InetAddress> nodes = new HashMap<>();
 
@@ -43,21 +43,21 @@ public class WorldsharingAddon extends LabyAddon<AddonConfiguration> {
             options.setTracesSampleRate(1.0);
         });
 
-        api = new APIHandler(this);
         sessionHandler = new SessionHandler(this);
         dashboardActivity = new DashboardActivity(this);
 
         labyAPI().navigationService().register("ws_nav", new NavigationElement("ws_nav", dashboardActivity));
         registerCommand(new WhitelistCommand(this));
         registerCommand(new DebugCommand());
-        Thread.ofVirtual().start(api::init);
+        Thread.ofVirtual().start(API::init);
 
         configuration().enabled().addChangeListener(v -> {
             if (!v && sessionHandler.isConnected()) {
                 sessionHandler.disconnect();
-                api.pings.clear();
             }
         });
+
+        this.labyAPI().interactionMenuRegistry().register(new KickBulletPoint());
     }
 
     public boolean isConnected() {

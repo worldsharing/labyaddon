@@ -26,7 +26,6 @@ public class PacketSharedSecret extends Packet {
         if (encryptedSharedSecret == null) {
             return;
         }
-        //write fully packet encoded encrypted sharedsecret
         buf.writeBytes(encryptedSharedSecret);
     }
 
