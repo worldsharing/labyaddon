@@ -9,10 +9,8 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 @Mixin(PlayerList.class)
 public class MixinServerBrand {
 
-    @ModifyArg(
-            method = "initializeConnectionToPlayer",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;writeString(Ljava/lang/String;)Lnet/minecraft/network/PacketBuffer;")
-    )
+    @ModifyArg(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/network/PacketBuffer;writeString(Ljava/lang/String;)Lnet/minecraft/network/PacketBuffer;"))
     public String changeBrand(String brand) {
         return Utils.getBrand(brand);
     }

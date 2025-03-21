@@ -1,7 +1,7 @@
 rootProject.name = "worldsharing"
 
 pluginManagement {
-    val labyGradlePluginVersion = "0.5.7"
+    val labyGradlePluginVersion = "0.5.8"
 
     buildscript {
         repositories {

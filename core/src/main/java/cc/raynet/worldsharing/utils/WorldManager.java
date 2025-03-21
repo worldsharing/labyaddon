@@ -3,8 +3,10 @@ package cc.raynet.worldsharing.utils;
 import cc.raynet.worldsharing.utils.model.GameDifficulty;
 import cc.raynet.worldsharing.utils.model.GameMode;
 import io.netty.channel.ChannelHandler;
+import net.labymod.api.reference.annotation.Referenceable;
 
-public interface VersionBridge {
+@Referenceable
+public interface WorldManager {
 
     void openChannel(ChannelHandler client);
 

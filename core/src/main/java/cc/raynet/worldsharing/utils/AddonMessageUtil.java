@@ -4,6 +4,7 @@ import cc.raynet.worldsharing.WorldsharingAddon;
 import cc.raynet.worldsharing.protocol.SessionHandler;
 import cc.raynet.worldsharing.utils.model.WorldVisibility;
 import net.labymod.api.Laby;
+import net.labymod.api.labyconnect.LabyConnectSession;
 import net.labymod.api.labyconnect.protocol.model.friend.Friend;
 
 import java.util.ArrayList;
@@ -30,20 +31,20 @@ public class AddonMessageUtil {
                 .sendAddonDevelopment(WorldsharingAddon.INSTANCE.addonInfo().getNamespace(), uuids, new byte[]{action});
     }
 
-    public static String[] getFriendsUUIDs() {
+    public static String[] getFriends() {
         if (!Laby.labyAPI().labyConnect().isConnectionEstablished()) {
             return null;
         }
-        List<Friend> labyFriends = Laby.labyAPI().labyConnect().getSession().getFriends();
-        if (labyFriends == null) {
+        LabyConnectSession session = Laby.labyAPI().labyConnect().getSession();
+        if (session == null) {
             return null;
         }
 
-        List<String> friendsUUIDs = new ArrayList<>();
-        for (Friend friend : labyFriends) {
-            friendsUUIDs.add(friend.getUniqueId().toString().replace("-", ""));
+        List<String> friends = new ArrayList<>();
+        for (Friend friend : session.getFriends()) {
+            friends.add(friend.getName());
         }
-        return friendsUUIDs.toArray(String[]::new);
+        return friends.toArray(String[]::new);
     }
 
     public static UUID[] getOnlineFriendsUUIDs() {

@@ -36,7 +36,7 @@ public class NodeSelection extends FlexibleContentWidget {
 
         ButtonWidget refreshButton = ButtonWidget.icon(SpriteCommon.REFRESH);
         refreshButton.addId("refresh-button");
-        refreshButton.setPressable(() -> Thread.ofVirtual().start(() -> API.init()));
+        refreshButton.setPressable(() -> Thread.ofVirtual().start(API::init));
         refreshButton.setHoverComponent(Component.translatable("labymod.ui.button.refresh"));
 
 

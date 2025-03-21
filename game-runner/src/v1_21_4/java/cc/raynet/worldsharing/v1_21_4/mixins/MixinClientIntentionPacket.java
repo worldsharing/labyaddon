@@ -9,11 +9,11 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 @Mixin(ClientIntentionPacket.class)
 public class MixinClientIntentionPacket {
 
-     @ModifyConstant(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V", constant = @Constant(intValue = 255))
-     private static int increaseMaxValue(int i) {
-         if (WorldsharingAddon.INSTANCE.isConnected()) {
-             return Short.MAX_VALUE;
-         }
-         return i;
-     }
+    @ModifyConstant(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V", constant = @Constant(intValue = 255))
+    private static int increaseMaxValue(int i) {
+        if (WorldsharingAddon.INSTANCE.isConnected()) {
+            return Short.MAX_VALUE;
+        }
+        return i;
+    }
 }

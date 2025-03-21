@@ -1,6 +1,7 @@
 package cc.raynet.worldsharing.protocol.model;
 
-import cc.raynet.worldsharing.utils.VersionStorage;
+import cc.raynet.worldsharing.WorldsharingAddon;
+import cc.raynet.worldsharing.utils.WorldManager;
 import cc.raynet.worldsharing.utils.model.GameMode;
 import net.luminis.quic.QuicStream;
 
@@ -15,7 +16,8 @@ public class Player {
     public boolean operator;
 
     public Player() {
-        this.gameMode = VersionStorage.bridge != null ? VersionStorage.bridge.getGameMode() : GameMode.SURVIVAL;
+        WorldManager manager = WorldsharingAddon.INSTANCE.manager();
+        this.gameMode = manager != null ? manager.getGameMode() : GameMode.SURVIVAL;
     }
 
     public Player(String username, QuicStream stream, boolean isBedrock, String nodeIP) {

@@ -18,20 +18,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class MixinServerLoginPacketListener {
 
-    @Shadow abstract void startClientVerification(GameProfile $$0);
+    @Shadow
+    @Final
+    Connection connection;
 
-    @Shadow @Final Connection connection;
+    @Shadow
+    abstract void startClientVerification(GameProfile $$0);
 
-    @Redirect(method = "handleHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;usesAuthentication()Z"))
+    @Redirect(method = "handleHello",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;usesAuthentication()Z"))
     public boolean usesAuthentication(MinecraftServer instance) {
         return instance.usesAuthentication() && ((PropertyStorage) connection).worldsharing$getProperties() == null;
     }
 
-    @Inject(
-            method = "handleHello",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;startClientVerification(Lcom/mojang/authlib/GameProfile;)V", ordinal = 1),
-            cancellable = true
-    )
+    @Inject(method = "handleHello", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;startClientVerification(Lcom/mojang/authlib/GameProfile;)V",
+            ordinal = 1), cancellable = true)
     public void setId(ServerboundHelloPacket helloPacket, CallbackInfo ci) {
         GameProfile profile = new GameProfile(helloPacket.profileId(), helloPacket.name());
         Property[] properties = ((PropertyStorage) connection).worldsharing$getProperties();

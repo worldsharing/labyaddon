@@ -2,8 +2,7 @@ package cc.raynet.worldsharing.v1_18_2.mixins;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
 import cc.raynet.worldsharing.protocol.proxy.ChannelProxy;
-import cc.raynet.worldsharing.utils.VersionStorage;
-import cc.raynet.worldsharing.v1_18_2.client.VersionBridgeImpl;
+import cc.raynet.worldsharing.utils.Utils;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
@@ -45,16 +44,12 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
         WorldsharingAddon.INSTANCE.sessionHandler.disconnect();
     }
 
-    @Inject(method = "publishServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerConnectionListener;startTcpServerListener(Ljava/net/InetAddress;I)V", shift = At.Shift.AFTER))
+    @Inject(method = "publishServer", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/network/ServerConnectionListener;startTcpServerListener(Ljava/net/InetAddress;I)V",
+            shift = At.Shift.AFTER))
     public void setProxyAddress(GameType gameType, boolean $$1, int $$2, CallbackInfoReturnable<Boolean> cir) {
-        VersionStorage.proxyChannelAddress = worldsharing$startProxyChannel(getConnection());
+        Utils.proxyChannelAddress = worldsharing$startProxyChannel(getConnection());
     }
-
-    @Inject(method = "initServer", at = @At("TAIL"))
-    public void setMixinBridge(CallbackInfoReturnable<Boolean> cir) {
-        VersionStorage.bridge = new VersionBridgeImpl();
-    }
-
 
     @Unique
     private SocketAddress worldsharing$startProxyChannel(ServerConnectionListener listener) {

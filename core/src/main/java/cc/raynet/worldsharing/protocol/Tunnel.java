@@ -6,7 +6,7 @@ import cc.raynet.worldsharing.protocol.model.Player;
 import cc.raynet.worldsharing.protocol.packets.PacketRequestTunnel;
 import cc.raynet.worldsharing.protocol.proxy.ChannelProxy;
 import cc.raynet.worldsharing.utils.CryptUtils;
-import cc.raynet.worldsharing.utils.VersionStorage;
+import cc.raynet.worldsharing.utils.WorldManager;
 import net.labymod.api.util.Pair;
 import net.luminis.quic.QuicClientConnection;
 import net.luminis.quic.QuicStream;
@@ -87,10 +87,11 @@ public class Tunnel {
                         .getHostAddress());
                 sessionHandler.players.add(player);
 
-                if (VersionStorage.bridge != null) {
-                    VersionStorage.bridge.openChannel(new ChannelProxy(stream, () -> {
+                WorldManager manager = WorldsharingAddon.INSTANCE.manager();
+                if (manager != null) {
+                    manager.openChannel(new ChannelProxy(stream, () -> {
                         sessionHandler.players.remove(player);
-                        VersionStorage.bridge.setOperator(player.username, false);
+                        manager.setOperator(player.username, false);
                         sessionHandler.addon.dashboardActivity.reloadDashboard();
                     }));
                     sessionHandler.addon.dashboardActivity.reloadDashboard();

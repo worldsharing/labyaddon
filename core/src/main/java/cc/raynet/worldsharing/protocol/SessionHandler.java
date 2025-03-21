@@ -11,11 +11,7 @@ import cc.raynet.worldsharing.protocol.pipeline.ChannelHandler;
 import cc.raynet.worldsharing.protocol.pipeline.PacketEncryptingDecoder;
 import cc.raynet.worldsharing.protocol.pipeline.PacketEncryptingEncoder;
 import cc.raynet.worldsharing.protocol.types.ConnectionState;
-import cc.raynet.worldsharing.utils.AddonMessageUtil;
-import cc.raynet.worldsharing.utils.CryptUtils;
-import cc.raynet.worldsharing.utils.Utils;
-import cc.raynet.worldsharing.utils.VersionBridge;
-import cc.raynet.worldsharing.utils.VersionStorage;
+import cc.raynet.worldsharing.utils.*;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -36,8 +32,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.inject.Singleton;
 import java.math.BigInteger;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -102,12 +98,12 @@ public class SessionHandler extends PacketHandler {
 
     public void disconnect() {
         disconnect(null);
-        VersionBridge bridge = VersionStorage.bridge;
-        if (bridge != null) {
+        WorldManager manager = addon.manager();
+        if (manager != null) {
             for (Player player : players) {
-                bridge.kickPlayer(player.username, "Host stopped sharing");
+                manager.kickPlayer(player.username, "Host stopped sharing");
             }
-            bridge.stopServer();
+            manager.stopServer();
         }
         players.clear();
     }
@@ -120,7 +116,7 @@ public class SessionHandler extends PacketHandler {
     }
 
     private void shutdown() {
-        if (state == ConnectionState.DISCONNECTED) {
+        if (state == ConnectionState.DISCONNECTED || state == ConnectionState.DISCONNECTING) {
             return;
         }
         state = ConnectionState.DISCONNECTING;
@@ -143,11 +139,6 @@ public class SessionHandler extends PacketHandler {
 
 
     private synchronized void connect() throws Exception {
-        if (state != ConnectionState.DISCONNECTED) {
-            WorldsharingAddon.LOGGER.warn("Already connected or connecting.");
-            return;
-        }
-
         state = ConnectionState.CONNECTING;
         addon.dashboardActivity.reloadDashboard();
         this.channelHandler = new ChannelHandler(this);
@@ -159,21 +150,20 @@ public class SessionHandler extends PacketHandler {
                 .channel(NioSocketChannel.class)
                 .handler(this.channelHandler);
 
-        bootstrap.connect(Utils.getTunnelControlAddr(WorldsharingAddon.GATEWAY_DOMAIN)).syncUninterruptibly();
+        API.Control control = API.getControl();
+
+        bootstrap.connect(new InetSocketAddress(control.host, control.port)).syncUninterruptibly();
 
         byte[] sharedSecret = Utils.randomString(16).getBytes(StandardCharsets.UTF_8);
 
-        sendPacket(new PacketSharedSecret(CryptUtils.encryptWithPublicKey(sharedSecret, API.getPublicKey())));
+        sendPacket(new PacketSharedSecret(CryptUtils.encryptWithPublicKey(sharedSecret, control.key)));
 
         SecretKeySpec secretKey = new SecretKeySpec(sharedSecret, "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(sharedSecret);
 
         Channel ch = getChannel();
-        ch.pipeline()
-                .addBefore("splitter", "decrypt", new PacketEncryptingDecoder(CryptUtils.createCipher(Cipher.DECRYPT_MODE, secretKey, ivSpec)));
-
-        ch.pipeline()
-                .addBefore("prepender", "encrypt", new PacketEncryptingEncoder(CryptUtils.createCipher(Cipher.ENCRYPT_MODE, secretKey, ivSpec)));
+        ch.pipeline().addBefore("splitter", "decrypt", new PacketEncryptingDecoder(CryptUtils.createCipher(Cipher.DECRYPT_MODE, secretKey, ivSpec)));
+        ch.pipeline().addBefore("prepender", "encrypt", new PacketEncryptingEncoder(CryptUtils.createCipher(Cipher.ENCRYPT_MODE, secretKey, ivSpec)));
 
         sendPacket(new PacketEncryptionStart(Laby.labyAPI().getName()));
     }
@@ -207,14 +197,14 @@ public class SessionHandler extends PacketHandler {
             return;
         }
 
-        if (VersionStorage.bridge == null) {
-            WorldsharingAddon.LOGGER.debug("VersionBridge is null");
+        if (addon.manager() == null) {
+            WorldsharingAddon.LOGGER.debug("WorldManager is null");
         }
 
         sendPacket(new PacketEncryptionResponse(enc.verifyToken), e -> sendPacket(new PacketLogin(tunnelInfo.visibility.value, addon.addonInfo()
                 .getVersion(), addon.labyAPI()
                 .minecraft()
-                .getProtocolVersion(), VersionStorage.bridge.getWorldName(), VersionStorage.bridge.getSlots(), AddonMessageUtil.getFriendsUUIDs())));
+                .getProtocolVersion(), addon.manager().getWorldName(), addon.manager().getSlots(), AddonMessageUtil.getFriends())));
     }
 
     @Override

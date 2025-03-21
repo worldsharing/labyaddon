@@ -5,8 +5,7 @@ import cc.raynet.worldsharing.protocol.model.Player;
 import cc.raynet.worldsharing.protocol.packets.PacketSlotUpdate;
 import cc.raynet.worldsharing.protocol.packets.PacketVisibilityUpdate;
 import cc.raynet.worldsharing.protocol.types.ConnectionState;
-import cc.raynet.worldsharing.utils.VersionBridge;
-import cc.raynet.worldsharing.utils.VersionStorage;
+import cc.raynet.worldsharing.utils.WorldManager;
 import cc.raynet.worldsharing.utils.model.GameDifficulty;
 import cc.raynet.worldsharing.utils.model.GameMode;
 import cc.raynet.worldsharing.utils.model.WorldVisibility;
@@ -52,10 +51,10 @@ public class DashboardActivity extends Activity {
     @Override
     public void initialize(Parent parent) {
         super.initialize(parent);
-        if (!addon.isConnected() || VersionStorage.bridge == null) {
+        if (!addon.isConnected() || addon.manager() == null) {
             return;
         }
-        VersionBridge bridge = VersionStorage.bridge;
+        WorldManager manager = addon.manager();
 
         FlexibleContentWidget container = new FlexibleContentWidget().addId("container");
 
@@ -63,28 +62,28 @@ public class DashboardActivity extends Activity {
         options.addId("options");
 
         if (port == 0) {
-            port = bridge.getSuitableLanPort();
+            port = manager.getSuitableLanPort();
         }
 
         if (tempSlots == 0) {
-            tempSlots = bridge.getSlots();
+            tempSlots = manager.getSlots();
         }
 
         // Allow Cheats
-        SwitchWidget allowCheatsSwitch = SwitchWidget.create(bridge::setCheatsEnabled);
-        allowCheatsSwitch.setValue(bridge.cheatsEnabled());
+        SwitchWidget allowCheatsSwitch = SwitchWidget.create(manager::setCheatsEnabled);
+        allowCheatsSwitch.setValue(manager.cheatsEnabled());
 
         // Difficulty
         DropdownWidget<GameDifficulty> difficultyDropDown = new DropdownWidget<>();
         difficultyDropDown.addAll(GameDifficulty.values());
-        difficultyDropDown.setSelected(bridge.getDifficulty());
-        difficultyDropDown.setChangeListener(bridge::changeDifficulty);
+        difficultyDropDown.setSelected(manager.getDifficulty());
+        difficultyDropDown.setChangeListener(manager::changeDifficulty);
 
         // GameMode
         DropdownWidget<GameMode> gameModeDropDown = new DropdownWidget<>();
         gameModeDropDown.addAll(GameMode.values());
-        gameModeDropDown.setSelected(bridge.getGameMode());
-        gameModeDropDown.setChangeListener(bridge::changeGameMode);
+        gameModeDropDown.setSelected(manager.getGameMode());
+        gameModeDropDown.setChangeListener(manager::changeGameMode);
 
         // Max Slots
 
@@ -92,18 +91,18 @@ public class DashboardActivity extends Activity {
             if (addon.sessionHandler.isConnected()) {
                 tempSlots = (int) val;
             } else {
-                bridge.setSlots((int) val);
+                manager.setSlots((int) val);
             }
         }).range(2, (Laby.labyAPI().labyConnect().getSession() == null ? 12 : (Laby.labyAPI().labyConnect().getSession().self().gameUser().visibleGroup().isDefault() ? 12 : 32)));
-        maxSlotsSlider.setValue(addon.sessionHandler.isConnected() ? tempSlots : bridge.getSlots());
+        maxSlotsSlider.setValue(addon.sessionHandler.isConnected() ? tempSlots : manager.getSlots());
 
 
         // Max Slots Update Button
         ButtonWidget maxSlotsSaveButton = new ButtonWidget();
         maxSlotsSaveButton.text().set(Component.text("Update"));
         maxSlotsSaveButton.setActionListener(() -> {
-            if (tempSlots != bridge.getSlots()) {
-                addon.sessionHandler.sendPacket(new PacketSlotUpdate((int) maxSlotsSlider.getValue()), f -> bridge.setSlots((int) maxSlotsSlider.getValue()));
+            if (tempSlots != manager.getSlots()) {
+                addon.sessionHandler.sendPacket(new PacketSlotUpdate((int) maxSlotsSlider.getValue()), f -> manager.setSlots((int) maxSlotsSlider.getValue()));
             }
         });
 
@@ -129,15 +128,13 @@ public class DashboardActivity extends Activity {
             }
         });
         portInput.setText(String.valueOf(port));
-        portInput.setEditable(!bridge.isPublished());
-
+        portInput.setEditable(!manager.isPublished());
 
         // Visibility
         DropdownWidget<WorldVisibility> visibilityDropDown = new DropdownWidget<>();
         visibilityDropDown.addAll(WorldVisibility.values());
         visibilityDropDown.setSelected(addon.sessionHandler.tunnelInfo.visibility);
         visibilityDropDown.setChangeListener(e -> addon.sessionHandler.sendPacket(new PacketVisibilityUpdate(e), b -> addon.sessionHandler.tunnelInfo.visibility = e));
-
 
         addOption("allow_cheats", allowCheatsSwitch);
         addOption("difficulty", difficultyDropDown);
@@ -150,7 +147,7 @@ public class DashboardActivity extends Activity {
             case CONNECTED -> ComponentWidget.i18n("worldsharing.enums.status.connected");
             case CONNECTING -> ComponentWidget.i18n("worldsharing.enums.status.connecting");
             default -> {
-                if (addon.sessionHandler.getState() == ConnectionState.DISCONNECTED && bridge.isPublished() && addon.sessionHandler.lastError == null) {
+                if (addon.sessionHandler.getState() == ConnectionState.DISCONNECTED && manager.isPublished() && addon.sessionHandler.lastError == null) {
                     yield ComponentWidget.i18n("worldsharing.messages.shared_to_lan");
                 }
                 if (addon.sessionHandler.lastError == null) {
@@ -193,11 +190,11 @@ public class DashboardActivity extends Activity {
         shareButton.setActionListener(this::init);
 
         ButtonWidget closeButton = new ButtonWidget();
-        closeButton.setEnabled(bridge.isPublished() || addon.sessionHandler.isConnected());
+        closeButton.setEnabled(manager.isPublished() || addon.sessionHandler.isConnected());
         closeButton.text().set(Component.translatable("worldsharing.menu.close"));
         closeButton.setActionListener(() -> {
-            if (!addon.sessionHandler.isConnected() && bridge.isPublished()) {
-                bridge.stopServer();
+            if (!addon.sessionHandler.isConnected() && manager.isPublished()) {
+                manager.stopServer();
                 reload();
                 return;
             }
@@ -216,10 +213,10 @@ public class DashboardActivity extends Activity {
 
         ButtonWidget openToLan = new ButtonWidget();
         openToLan.text().set(Component.translatable("menu.shareToLan"));
-        openToLan.setEnabled(!bridge.isPublished());
+        openToLan.setEnabled(!manager.isPublished());
         openToLan.setActionListener(() -> {
-            if (!bridge.publishLanWorld(port, bridge.getGameMode(), bridge.cheatsEnabled())) {
-                port = bridge.getSuitableLanPort();
+            if (!manager.publishLanWorld(port, manager.getGameMode(), manager.cheatsEnabled())) {
+                port = manager.getSuitableLanPort();
             }
             reload();
         });
@@ -250,16 +247,16 @@ public class DashboardActivity extends Activity {
     }
 
     private synchronized void init() {
-        VersionBridge bridge = VersionStorage.bridge;
+        WorldManager manager = addon.manager();
         hostPlayer = new Player(Laby.labyAPI().getName(), null, false, null);
-        hostPlayer.gameMode = bridge.getPlayerGameMode(hostPlayer.username);
+        hostPlayer.gameMode = manager.getPlayerGameMode(hostPlayer.username);
 
-        if (bridge.isPublished() || bridge.publishLanWorld(port, bridge.getGameMode(), bridge.cheatsEnabled())) {
-            tempSlots = bridge.getSlots();
+        if (manager.isPublished() || manager.publishLanWorld(port, manager.getGameMode(), manager.cheatsEnabled())) {
+            tempSlots = manager.getSlots();
             addon.sessionHandler.init();
         } else {
             WorldsharingAddon.LOGGER.warn("failed to publish lan world");
-            port = bridge.getSuitableLanPort();
+            port = manager.getSuitableLanPort();
         }
     }
 
@@ -281,13 +278,13 @@ public class DashboardActivity extends Activity {
         playerGameMode.setSelected(p.gameMode);
         playerGameMode.setChangeListener(gameMode -> {
             p.gameMode = gameMode;
-            VersionStorage.bridge.setPlayerGameMode(p.username, gameMode);
+            addon.manager().setPlayerGameMode(p.username, gameMode);
         });
 
         buttons.addContent(playerGameMode);
 
         buttons.addContent(ButtonWidget.component(Component.text(p.operator ? "Deop" : "Op"), () -> {
-            VersionStorage.bridge.setOperator(p.username, !p.operator);
+            addon.manager().setOperator(p.username, !p.operator);
             p.operator = !p.operator;
             reloadDashboard();
         }));
@@ -305,7 +302,7 @@ public class DashboardActivity extends Activity {
                     .addButton(SimplePopupButton.create(Component.translatable("worldsharing.menu.kick"), e -> {
                         String reason = in.getText();
                         if (reason.isEmpty()) reason = "You were kicked from the World";
-                        VersionStorage.bridge.kickPlayer(p.username, reason);
+                        addon.manager().kickPlayer(p.username, reason);
                         reloadDashboard();
                     }))
                     .build()

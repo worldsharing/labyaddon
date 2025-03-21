@@ -5,9 +5,11 @@ import cc.raynet.worldsharing.api.API;
 import cc.raynet.worldsharing.command.DebugCommand;
 import cc.raynet.worldsharing.command.WhitelistCommand;
 import cc.raynet.worldsharing.config.AddonConfiguration;
+import cc.raynet.worldsharing.core.generated.DefaultReferenceStorage;
 import cc.raynet.worldsharing.interaction.KickBulletPoint;
 import cc.raynet.worldsharing.navigation.NavigationElement;
 import cc.raynet.worldsharing.protocol.SessionHandler;
+import cc.raynet.worldsharing.utils.WorldManager;
 import io.sentry.Sentry;
 import net.labymod.api.addon.LabyAddon;
 import net.labymod.api.models.addon.annotation.AddonMain;
@@ -27,6 +29,7 @@ public class WorldsharingAddon extends LabyAddon<AddonConfiguration> {
 
     public static Logging LOGGER;
     public static WorldsharingAddon INSTANCE;
+    private WorldManager worldManager;
 
     public SessionHandler sessionHandler;
     public DashboardActivity dashboardActivity;
@@ -36,6 +39,7 @@ public class WorldsharingAddon extends LabyAddon<AddonConfiguration> {
     @Override
     protected void enable() {
         this.registerSettingCategory();
+        worldManager = ((DefaultReferenceStorage) this.referenceStorageAccessor()).worldManager();
         INSTANCE = this;
         LOGGER = logger();
         Sentry.init((options) -> {
@@ -57,13 +61,17 @@ public class WorldsharingAddon extends LabyAddon<AddonConfiguration> {
             }
         });
 
-        this.labyAPI().interactionMenuRegistry().register(new KickBulletPoint());
+        this.labyAPI().interactionMenuRegistry().register(new KickBulletPoint(this));
     }
 
     public boolean isConnected() {
         return configuration().enabled().get() && labyAPI().minecraft()
                 .sessionAccessor()
                 .isPremium() && labyAPI().minecraft().isSingleplayer();
+    }
+
+    public WorldManager manager() {
+        return worldManager;
     }
 
     @Override

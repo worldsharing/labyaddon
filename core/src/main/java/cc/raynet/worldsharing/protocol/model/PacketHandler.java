@@ -1,17 +1,11 @@
 package cc.raynet.worldsharing.protocol.model;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
-import cc.raynet.worldsharing.protocol.packets.PacketDisconnect;
-import cc.raynet.worldsharing.protocol.packets.PacketEncryptionRequest;
-import cc.raynet.worldsharing.protocol.packets.PacketError;
-import cc.raynet.worldsharing.protocol.packets.PacketPing;
-import cc.raynet.worldsharing.protocol.packets.PacketReady;
-import cc.raynet.worldsharing.protocol.packets.PacketRequestTunnel;
-import cc.raynet.worldsharing.protocol.packets.PacketTunnelInfo;
-import cc.raynet.worldsharing.protocol.packets.PacketWhitelist;
+import cc.raynet.worldsharing.protocol.packets.*;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+
 import java.io.IOException;
 
 @Sharable

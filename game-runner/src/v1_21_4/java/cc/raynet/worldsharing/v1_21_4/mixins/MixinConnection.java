@@ -1,7 +1,7 @@
 package cc.raynet.worldsharing.v1_21_4.mixins;
 
 import cc.raynet.worldsharing.api.API;
-import cc.raynet.worldsharing.utils.VersionStorage;
+import cc.raynet.worldsharing.utils.Utils;
 import cc.raynet.worldsharing.v1_21_4.client.PropertyStorage;
 import com.mojang.authlib.properties.Property;
 import io.netty.channel.Channel;
@@ -27,7 +27,8 @@ public class MixinConnection implements PropertyStorage {
     @Shadow
     private Channel channel;
 
-    @Redirect(method = "connect", at = @At(value = "INVOKE", target = "Ljava/net/InetSocketAddress;getAddress()Ljava/net/InetAddress;"))
+    @Redirect(method = "connect",
+            at = @At(value = "INVOKE", target = "Ljava/net/InetSocketAddress;getAddress()Ljava/net/InetAddress;"))
     private static InetAddress spoofHostname(InetSocketAddress instance) {
         return API.getClosestNode(instance.getAddress());
     }
@@ -37,7 +38,7 @@ public class MixinConnection implements PropertyStorage {
         if (this.channel == null) {
             return;
         }
-        final SocketAddress checkAddr = VersionStorage.proxyChannelAddress;
+        final SocketAddress checkAddr = Utils.proxyChannelAddress;
         if (checkAddr == null) {
             return;
         }

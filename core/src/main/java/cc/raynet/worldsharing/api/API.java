@@ -10,8 +10,9 @@ import net.labymod.api.util.io.web.request.Request;
 import net.labymod.api.util.io.web.request.Request.Method;
 import net.labymod.api.util.io.web.request.Response;
 
-import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -47,24 +48,27 @@ public class API {
         }
     }
 
-    public static PublicKey getPublicKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        Response<String> response = Request.ofString()
-                .url(endpoint + "/connect/publickey")
+    public static Control getControl() throws WebRequestException, NoSuchAlgorithmException, InvalidKeySpecException {
+        Response<Control> req = Request.ofGson(new TypeToken<Control>() {})
                 .method(Method.GET)
+                .url(endpoint+"/connect/control")
                 .handleErrorStream()
                 .executeSync();
-        if (response.hasException()) {
-            throw response.exception();
+        if (req.hasException()) {
+            throw req.exception();
         }
 
-        if (response.getStatusCode() != 200) {
-            throw new WebRequestException(new Exception("Unexpected response code: " + response.getStatusCode()));
+        if (req.getStatusCode() != 200) {
+            throw new WebRequestException(new Exception("Unexpected response code:" + req.getStatusCode()));
         }
 
-        return CryptUtils.convertPKCS1ToPublicKey(response.get());
+        Control control = req.get();
+        control.key = CryptUtils.convertPKCS1ToPublicKey(control.publickey.getBytes(StandardCharsets.UTF_8));
+        control.publickey = null;
+        return req.get();
     }
 
-    public static Node getClosestNode() throws WebRequestException {
+    private static Node getClosestNode() throws WebRequestException {
         Response<Node> req = Request.ofGson(new TypeToken<Node>() {})
             .method(Method.GET)
             .url(endpoint+"/relay")
@@ -99,8 +103,15 @@ public class API {
         return req.get();
     }
 
-    public static class Node {
+    private static class Node {
         String name;
         String host;
+    }
+
+    public static class Control {
+        public String host;
+        public int port;
+        public PublicKey key;
+        String publickey;
     }
 }

@@ -13,7 +13,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
@@ -70,18 +69,10 @@ public class CryptUtils {
         return keyFactory.generatePublic(spec);
     }
 
-    public static PublicKey convertPKCS1ToPublicKey(String pemKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        String[] lines = pemKey.split("\n");
-        StringBuilder result = new StringBuilder();
-        for (int i = 1; i < lines.length - 1; i++) {
-            result.append(lines[i]);
-        }
-
-        // Parse the PKCS#1 key
+    public static PublicKey convertPKCS1ToPublicKey(byte[] key) throws NoSuchAlgorithmException, InvalidKeySpecException {
         BigInteger modulus;
         BigInteger exponent;
-        try (ASN1InputStream asn1InputStream = new ASN1InputStream(Base64.getDecoder()
-                .decode(result.toString().getBytes(StandardCharsets.UTF_8)))) {
+        try (ASN1InputStream asn1InputStream = new ASN1InputStream(Base64.getDecoder().decode(key))) {
             ASN1Primitive primitive = asn1InputStream.readObject();
             ASN1Sequence sequence = (ASN1Sequence) primitive;
             modulus = ((ASN1Integer) sequence.getObjectAt(0)).getValue();

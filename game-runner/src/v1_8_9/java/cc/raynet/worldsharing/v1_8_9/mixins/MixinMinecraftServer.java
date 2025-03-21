@@ -2,8 +2,7 @@ package cc.raynet.worldsharing.v1_8_9.mixins;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
 import cc.raynet.worldsharing.protocol.proxy.ChannelProxy;
-import cc.raynet.worldsharing.utils.VersionStorage;
-import cc.raynet.worldsharing.v1_8_9.client.VersionBridgeImpl;
+import cc.raynet.worldsharing.utils.Utils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -38,14 +37,11 @@ public abstract class MixinMinecraftServer extends MinecraftServer {
         WorldsharingAddon.INSTANCE.sessionHandler.disconnect();
     }
 
-    @Inject(method = "startServer", at = @At("TAIL"))
-    public void setMixinBridge(CallbackInfoReturnable<Boolean> cir) {
-        VersionStorage.bridge = new VersionBridgeImpl();
-    }
-
-    @Inject(method = "shareToLAN", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkSystem;addLanEndpoint(Ljava/net/InetAddress;I)V", shift = Shift.AFTER))
+    @Inject(method = "shareToLAN", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/network/NetworkSystem;addLanEndpoint(Ljava/net/InetAddress;I)V",
+            shift = Shift.AFTER))
     public void setIProxyInstance(WorldSettings.GameType par1, boolean par2, CallbackInfoReturnable<String> cir) {
-        VersionStorage.proxyChannelAddress = worldsharing$startProxyChannel(getNetworkSystem());
+        Utils.proxyChannelAddress = worldsharing$startProxyChannel(getNetworkSystem());
     }
 
     @Unique

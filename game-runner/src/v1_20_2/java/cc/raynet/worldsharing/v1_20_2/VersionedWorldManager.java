@@ -1,7 +1,7 @@
-package cc.raynet.worldsharing.v1_21_4.client;
+package cc.raynet.worldsharing.v1_20_2;
 
-import cc.raynet.worldsharing.utils.VersionBridge;
-import cc.raynet.worldsharing.utils.VersionStorage;
+import cc.raynet.worldsharing.utils.Utils;
+import cc.raynet.worldsharing.utils.WorldManager;
 import cc.raynet.worldsharing.utils.model.GameDifficulty;
 import cc.raynet.worldsharing.utils.model.GameMode;
 import io.netty.bootstrap.Bootstrap;
@@ -9,6 +9,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.local.LocalChannel;
+import net.labymod.api.models.Implements;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
@@ -19,7 +20,11 @@ import net.minecraft.util.HttpUtil;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 
-public class VersionBridgeImpl implements VersionBridge {
+import javax.inject.Singleton;
+
+@Singleton
+@Implements(WorldManager.class)
+public class VersionedWorldManager implements WorldManager {
 
     @Override
     public void openChannel(ChannelHandler client) {
@@ -28,7 +33,7 @@ public class VersionBridgeImpl implements VersionBridge {
             protected void initChannel(Channel ch) {
                 ch.pipeline().addLast("handler", client);
             }
-        }).channel(LocalChannel.class).connect(VersionStorage.proxyChannelAddress).syncUninterruptibly();
+        }).channel(LocalChannel.class).connect(Utils.proxyChannelAddress).syncUninterruptibly();
     }
 
     @Override
@@ -42,8 +47,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return false;
         }
-        return server
-                .publishServer(GameType.byId(gamemode.getId()), allowCheats, port);
+        return server.publishServer(GameType.byId(gamemode.getId()), allowCheats, port);
     }
 
     @Override
@@ -100,10 +104,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return null;
         }
-        return GameDifficulty.fromId(server
-                .getWorldData()
-                .getDifficulty()
-                .getId());
+        return GameDifficulty.fromId(server.getWorldData().getDifficulty().getId());
     }
 
     @Override
@@ -112,7 +113,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return false;
         }
-        return server.getPlayerList().isAllowCommandsForAllPlayers();
+        return server.getPlayerList().isAllowCheatsForAllPlayers();
     }
 
     @Override
@@ -122,7 +123,7 @@ public class VersionBridgeImpl implements VersionBridge {
             return;
         }
         PlayerList playerList = server.getPlayerList();
-        playerList.setAllowCommandsForAllPlayers(enabled);
+        playerList.setAllowCheatsForAllPlayers(enabled);
         for (var pl : playerList.getPlayers()) {
             playerList.sendPlayerPermissionLevel(pl);
         }

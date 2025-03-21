@@ -1,7 +1,7 @@
 package cc.raynet.worldsharing.v1_12_2.mixins;
 
 import cc.raynet.worldsharing.api.API;
-import cc.raynet.worldsharing.utils.VersionStorage;
+import cc.raynet.worldsharing.utils.Utils;
 import io.netty.channel.Channel;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,7 +20,9 @@ public class MixinConnection {
     @Shadow
     private Channel channel;
 
-    @ModifyArg(method = "createNetworkManagerAndConnect", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;connect(Ljava/net/InetAddress;I)Lio/netty/channel/ChannelFuture;"), index = 0)
+    @ModifyArg(method = "createNetworkManagerAndConnect", at = @At(value = "INVOKE",
+            target = "Lio/netty/bootstrap/Bootstrap;connect(Ljava/net/InetAddress;I)Lio/netty/channel/ChannelFuture;"),
+            index = 0)
     private static InetAddress spoofHostname(InetAddress inetHost) {
         return API.getClosestNode(inetHost);
     }
@@ -30,7 +32,7 @@ public class MixinConnection {
         if (this.channel == null) {
             return;
         }
-        final SocketAddress checkAddr = VersionStorage.proxyChannelAddress;
+        final SocketAddress checkAddr = Utils.proxyChannelAddress;
         if (checkAddr == null) {
             return;
         }

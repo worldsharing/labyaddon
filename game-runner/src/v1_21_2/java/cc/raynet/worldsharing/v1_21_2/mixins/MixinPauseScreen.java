@@ -29,7 +29,8 @@ public abstract class MixinPauseScreen {
     @Shadow
     protected abstract Button openScreenButton(Component component, Supplier<Screen> screenSupplier);
 
-    @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/PauseScreen;openScreenButton(Lnet/minecraft/network/chat/Component;Ljava/util/function/Supplier;)Lnet/minecraft/client/gui/components/Button;"))
+    @Redirect(method = "createPauseMenu", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/screens/PauseScreen;openScreenButton(Lnet/minecraft/network/chat/Component;Ljava/util/function/Supplier;)Lnet/minecraft/client/gui/components/Button;"))
     private Button createPauseMenuButton(PauseScreen instance, Component component, Supplier<Screen> screenSupplier) {
         if (Minecraft.getInstance()
                 .getSingleplayerServer() != null && (component.equals(SHARE_TO_LAN) || component.equals(PLAYER_REPORTING) && Minecraft.getInstance()

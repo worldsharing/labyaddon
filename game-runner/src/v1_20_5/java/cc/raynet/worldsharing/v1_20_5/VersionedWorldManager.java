@@ -1,7 +1,7 @@
-package cc.raynet.worldsharing.v1_8_9.client;
+package cc.raynet.worldsharing.v1_20_5;
 
-import cc.raynet.worldsharing.utils.VersionBridge;
-import cc.raynet.worldsharing.utils.VersionStorage;
+import cc.raynet.worldsharing.utils.Utils;
+import cc.raynet.worldsharing.utils.WorldManager;
 import cc.raynet.worldsharing.utils.model.GameDifficulty;
 import cc.raynet.worldsharing.utils.model.GameMode;
 import io.netty.bootstrap.Bootstrap;
@@ -9,39 +9,36 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.local.LocalChannel;
+import net.labymod.api.models.Implements;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.NetworkSystem;
-import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerConnectionListener;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.HttpUtil;
-import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.WorldSettings.GameType;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import javax.inject.Singleton;
 
-public class VersionBridgeImpl implements VersionBridge {
+@Singleton
+@Implements(WorldManager.class)
+public class VersionedWorldManager implements WorldManager {
 
     @Override
     public void openChannel(ChannelHandler client) {
-        new Bootstrap().group(NetworkSystem.eventLoops.getValue()).handler(new ChannelInitializer<>() {
+        new Bootstrap().group(ServerConnectionListener.SERVER_EVENT_GROUP.get()).handler(new ChannelInitializer<>() {
             @Override
             protected void initChannel(Channel ch) {
                 ch.pipeline().addLast("handler", client);
             }
-        }).channel(LocalChannel.class).connect(VersionStorage.proxyChannelAddress).syncUninterruptibly();
+        }).channel(LocalChannel.class).connect(Utils.proxyChannelAddress).syncUninterruptibly();
     }
 
     @Override
     public int getSuitableLanPort() {
-        try {
-            return HttpUtil.getSuitableLanPort();
-        } catch (IOException e) {
-            return -1;
-        }
+        return HttpUtil.getAvailablePort();
     }
 
     @Override
@@ -50,9 +47,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return false;
         }
-        return !server
-                .shareToLAN(GameType.getByID(gamemode.getId()), allowCheats)
-                .equals("-1");
+        return server.publishServer(GameType.byId(gamemode.getId()), allowCheats, port);
     }
 
     @Override
@@ -61,7 +56,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return "";
         }
-        return server.getWorldName();
+        return server.getWorldData().getLevelName();
     }
 
     @Override
@@ -70,7 +65,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return false;
         }
-        return server.getPublic();
+        return server.isPublished();
     }
 
     @Override
@@ -82,7 +77,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return;
         }
-        server.setGameType(GameType.getByID(gameMode.getId()));
+        server.setDefaultGameType(GameType.byId(gameMode.getId()));
     }
 
     @Override
@@ -91,7 +86,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return null;
         }
-        return GameMode.fromId(server.getGameType().getID());
+        return GameMode.fromId(server.getDefaultGameType().getId());
     }
 
     @Override
@@ -100,7 +95,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return;
         }
-        server.setDifficultyForAllWorlds(EnumDifficulty.getDifficultyEnum(difficulty.getId()));
+        server.setDifficulty(Difficulty.byId(difficulty.getId()), true);
     }
 
     @Override
@@ -109,7 +104,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return null;
         }
-        return GameDifficulty.fromId(server.getDifficulty().getDifficultyId());
+        return GameDifficulty.fromId(server.getWorldData().getDifficulty().getId());
     }
 
     @Override
@@ -118,7 +113,7 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return false;
         }
-        return server.getConfigurationManager().commandsAllowedForAll;
+        return server.getPlayerList().isAllowCommandsForAllPlayers();
     }
 
     @Override
@@ -127,7 +122,11 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return;
         }
-        server.getConfigurationManager().commandsAllowedForAll = enabled;
+        PlayerList playerList = server.getPlayerList();
+        playerList.setAllowCommandsForAllPlayers(enabled);
+        for (var pl : playerList.getPlayers()) {
+            playerList.sendPlayerPermissionLevel(pl);
+        }
     }
 
     @Override
@@ -136,26 +135,28 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return;
         }
-        EntityPlayerMP profile = server
-                .getConfigurationManager()
-                .getPlayerByUsername(name);
-        if (profile == null) return;
-        profile.playerNetServerHandler.kickPlayerFromServer(reason);
+        ServerPlayer profile = server.getPlayerList().getPlayerByName(name);
+        if (profile == null) {
+            return;
+        }
+        profile.connection.disconnect(Component.literal(reason));
     }
 
     @Override
     public int getSlots() {
         IntegratedServer server = getServer();
-        return server == null ? 0 : server.getConfigurationManager().maxPlayers;
+        if (server == null) {
+            return 0;
+        }
+        return server.getPlayerList().maxPlayers;
     }
 
     @Override
     public void setSlots(int slots) {
         IntegratedServer server = getServer();
-        if (server == null) {
-            return;
+        if (server != null) {
+            server.getPlayerList().maxPlayers = slots;
         }
-        server.getConfigurationManager().maxPlayers = slots;
     }
 
     @Override
@@ -164,9 +165,8 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return;
         }
-        server.getNetworkSystem().terminateEndpoints();
-        server.isPublic = false;
-
+        server.getConnection().stop();
+        server.publishedPort = -1;
     }
 
     @Override
@@ -175,11 +175,11 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return null;
         }
-        EntityPlayerMP player = server.getConfigurationManager().getPlayerByUsername(username);
+        ServerPlayer player = server.getPlayerList().getPlayerByName(username);
         if (player == null) {
             return null;
         }
-        return GameMode.fromId(player.theItemInWorldManager.getGameType().getID());
+        return GameMode.fromId(player.gameMode.getGameModeForPlayer().getId());
     }
 
     @Override
@@ -188,11 +188,12 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return;
         }
-        EntityPlayerMP player = server.getConfigurationManager().getPlayerByUsername(username);
+        ServerPlayer player = server.getPlayerList().getPlayerByName(username);
         if (player == null) {
             return;
         }
-        player.setGameType(GameType.getByID(gameMode.getId()));
+
+        player.setGameMode(GameType.byId(gameMode.getId()));
     }
 
     @Override
@@ -201,17 +202,17 @@ public class VersionBridgeImpl implements VersionBridge {
         if (server == null) {
             return;
         }
-        EntityPlayerMP player = server.getConfigurationManager().getPlayerByUsername(username);
+        ServerPlayer player = server.getPlayerList().getPlayerByName(username);
         if (player != null) {
             if (op) {
-                server.getConfigurationManager().addOp(player.getGameProfile());
+                server.getPlayerList().op(player.getGameProfile());
             } else {
-                server.getConfigurationManager().removeOp(player.getGameProfile());
+                server.getPlayerList().deop(player.getGameProfile());
             }
         }
     }
 
     private IntegratedServer getServer() {
-        return Minecraft.getMinecraft().getIntegratedServer();
+        return Minecraft.getInstance().getSingleplayerServer();
     }
 }

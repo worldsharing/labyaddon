@@ -1,7 +1,6 @@
 package cc.raynet.worldsharing.interaction;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
-import cc.raynet.worldsharing.utils.VersionStorage;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.entity.player.Player;
 import net.labymod.api.client.entity.player.interaction.BulletPoint;
@@ -10,6 +9,12 @@ import net.labymod.api.client.gui.screen.widget.widgets.input.TextFieldWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.popup.SimpleAdvancedPopup;
 
 public class KickBulletPoint implements BulletPoint {
+
+    private final WorldsharingAddon addon;
+
+    public KickBulletPoint(WorldsharingAddon addon) {
+        this.addon = addon;
+    }
 
     @Override
     public Component getTitle() {
@@ -35,7 +40,7 @@ public class KickBulletPoint implements BulletPoint {
                     .addButton(SimpleAdvancedPopup.SimplePopupButton.create(Component.translatable("worldsharing.menu.kick"), e -> {
                         String reason = in.getText();
                         if (reason.isEmpty()) reason = "You were kicked from the World";
-                        VersionStorage.bridge.kickPlayer(player.profile().getUsername().toLowerCase(), reason);
+                        addon.manager().kickPlayer(player.profile().getUsername().toLowerCase(), reason);
                     }))
             .build()
             .displayAsActivity();

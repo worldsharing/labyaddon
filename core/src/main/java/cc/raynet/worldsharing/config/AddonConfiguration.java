@@ -1,8 +1,6 @@
 package cc.raynet.worldsharing.config;
 
-import cc.raynet.worldsharing.WorldsharingAddon;
 import cc.raynet.worldsharing.config.NodeSelection.Selector;
-import net.labymod.api.Laby;
 import net.labymod.api.addon.AddonConfig;
 import net.labymod.api.client.gui.screen.widget.widgets.input.ButtonWidget.ButtonSetting;
 import net.labymod.api.client.gui.screen.widget.widgets.input.SwitchWidget.SwitchSetting;
