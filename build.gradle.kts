@@ -6,7 +6,7 @@ plugins {
 val versions = providers.gradleProperty("net.labymod.minecraft-versions").get().split(";")
 
 group = "cc.raynet"
-version = providers.environmentVariable("VERSION").getOrElse("1.0.0")
+version = providers.environmentVariable("VERSION").getOrElse("1.1.0")
 
 labyMod {
     defaultPackageName = "cc.raynet.worldsharing"
@@ -15,7 +15,7 @@ labyMod {
         displayName = "World Sharing"
         author = "Raynet Team"
         description = "Play on your Singleplayer world with your friends!"
-        minecraftVersion = "1.8<1.21.4"
+        minecraftVersion = "1.8<1.21.5"
         version = rootProject.version.toString()
     }
 
