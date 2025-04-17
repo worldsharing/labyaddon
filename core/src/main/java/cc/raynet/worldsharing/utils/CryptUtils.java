@@ -6,20 +6,29 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.crypto.params.X25519KeyGenerationParameters;
+import org.bouncycastle.crypto.params.X25519PrivateKeyParameters;
+import org.bouncycastle.crypto.params.X25519PublicKeyParameters;
+import org.bouncycastle.math.ec.rfc7748.X25519;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class CryptUtils {
+public final class CryptUtils {
 
     public static byte[] encryptWithPublicKey(byte[] data, PublicKey publicKey) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
@@ -69,18 +78,20 @@ public class CryptUtils {
         return keyFactory.generatePublic(spec);
     }
 
-    public static PublicKey convertPKCS1ToPublicKey(byte[] key) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        BigInteger modulus;
-        BigInteger exponent;
-        try (ASN1InputStream asn1InputStream = new ASN1InputStream(Base64.getDecoder().decode(key))) {
-            ASN1Primitive primitive = asn1InputStream.readObject();
-            ASN1Sequence sequence = (ASN1Sequence) primitive;
-            modulus = ((ASN1Integer) sequence.getObjectAt(0)).getValue();
-            exponent = ((ASN1Integer) sequence.getObjectAt(1)).getValue();
-        } catch (IOException e) {
-            throw new InvalidKeySpecException("Invalid PKCS#1 key", e);
-        }
+    public static ECCKeyPair generateECCKeyPair() throws Exception {
+        byte[] privateKey = new byte[32];
+        X25519.generatePrivateKey(SecureRandom.getInstanceStrong(), privateKey);
 
-        return KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(modulus, exponent));
+        byte[] publicKey = new byte[32];
+        X25519.generatePublicKey(privateKey, 0, publicKey, 0);
+
+        return new ECCKeyPair(privateKey, publicKey);
+    }
+
+    public record ECCKeyPair(byte[] privateKey, byte[] publicKey) {
+        public ECCKeyPair(byte[] privateKey, byte[] publicKey) {
+            this.publicKey = publicKey.clone();
+            this.privateKey = privateKey.clone();
+        }
     }
 }

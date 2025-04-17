@@ -27,29 +27,30 @@ import net.labymod.api.concurrent.ThreadFactoryBuilder;
 import net.labymod.api.util.Pair;
 import net.labymod.api.util.io.web.exception.WebRequestException;
 import net.luminis.quic.QuicClientConnection;
+import org.bouncycastle.math.ec.rfc7748.X25519;
+import org.bouncycastle.util.encoders.Hex;
 import org.jetbrains.annotations.Nullable;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
+import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
-public class SessionHandler extends PacketHandler {
+public final class SessionHandler extends PacketHandler {
 
     public final WorldsharingAddon addon;
-    private final NioEventLoopGroup wsLoopGroup = new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).withNameFormat("WorldsharingNio#%d")
-            .build());
+    private final NioEventLoopGroup wsLoopGroup = new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).withNameFormat("WorldsharingNio#%d").build());
     private final Protocol protocol;
 
     public Set<Player> players = Collections.synchronizedSet(new HashSet<>());
@@ -82,7 +83,7 @@ public class SessionHandler extends PacketHandler {
             shutdown();
             return;
         }
-        Thread.ofVirtual().start(() -> {
+        Thread.ofVirtual().name("Worldsharing Connect").start(() -> {
             try {
                 connect();
             } catch (Exception e) {
@@ -123,7 +124,7 @@ public class SessionHandler extends PacketHandler {
         NioSocketChannel channel = getChannel();
         if (channel != null && channel.isOpen()) {
             channel.close();
-            AddonMessageUtil.send(AddonMessageUtil.getOnlineFriendsUUIDs(), AddonMessageUtil.ACTION_REMOVE);
+            AddonMessageUtil.send(AddonMessageUtil.getOnlineFriendsUUIDs(), AddonMessageUtil.Action.REMOVE);
         }
 
         channelHandler = null;
@@ -137,8 +138,10 @@ public class SessionHandler extends PacketHandler {
         }
     }
 
-
     private synchronized void connect() throws Exception {
+        if (API.keyPair == null) {
+            API.keyPair = CryptUtils.generateECCKeyPair();
+        }
         state = ConnectionState.CONNECTING;
         addon.dashboardActivity.reloadDashboard();
         this.channelHandler = new ChannelHandler(this);
@@ -153,13 +156,15 @@ public class SessionHandler extends PacketHandler {
         API.Control control = API.getControl();
 
         bootstrap.connect(new InetSocketAddress(control.host, control.port)).syncUninterruptibly();
+        sendPacket(new PacketSharedSecret(API.keyPair.publicKey()));
 
-        byte[] sharedSecret = Utils.randomString(16).getBytes(StandardCharsets.UTF_8);
+        byte[] sharedSecret = new byte[32];
 
-        sendPacket(new PacketSharedSecret(CryptUtils.encryptWithPublicKey(sharedSecret, control.key)));
+        // calculate shared secret from private key and peer public key
+        X25519.calculateAgreement(API.keyPair.privateKey(), 0, Hex.decode(control.key), 0, sharedSecret, 0);
 
         SecretKeySpec secretKey = new SecretKeySpec(sharedSecret, "AES");
-        IvParameterSpec ivSpec = new IvParameterSpec(sharedSecret);
+        IvParameterSpec ivSpec = new IvParameterSpec(Arrays.copyOfRange(sharedSecret, 0, 16));
 
         Channel ch = getChannel();
         ch.pipeline().addBefore("splitter", "decrypt", new PacketEncryptingDecoder(CryptUtils.createCipher(Cipher.DECRYPT_MODE, secretKey, ivSpec)));
@@ -201,7 +206,7 @@ public class SessionHandler extends PacketHandler {
             WorldsharingAddon.LOGGER.debug("WorldManager is null");
         }
 
-        sendPacket(new PacketEncryptionResponse(enc.verifyToken), e -> sendPacket(new PacketLogin(tunnelInfo.visibility.value, addon.addonInfo()
+        sendPacket(new PacketEncryptionResponse(enc.verifyToken), e -> sendPacket(new PacketLogin(tunnelInfo.visibility.get(), addon.addonInfo()
                 .getVersion(), addon.labyAPI()
                 .minecraft()
                 .getProtocolVersion(), addon.manager().getWorldName(), addon.manager().getSlots(), AddonMessageUtil.getFriends())));
@@ -256,7 +261,7 @@ public class SessionHandler extends PacketHandler {
     public void handle(PacketReady ready) {
         state = ConnectionState.CONNECTED;
         addon.dashboardActivity.reloadDashboard();
-        AddonMessageUtil.send(AddonMessageUtil.getOnlineFriendsUUIDs(), AddonMessageUtil.ACTION_ADD);
+        AddonMessageUtil.send(AddonMessageUtil.getOnlineFriendsUUIDs(), AddonMessageUtil.Action.ADD);
         Laby.labyAPI().minecraft().sounds().playSound(ResourceLocation.create("labymod", "lootbox.common"), 1f, 1f);
     }
 
