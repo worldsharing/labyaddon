@@ -11,14 +11,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class AddonMessageUtil {
+public final class AddonMessageUtil {
 
-    public static final byte ACTION_ADD = 1;
-    public static final byte ACTION_REMOVE = 2;
-    public static final byte ACTION_INVITE = 3;
+    public enum Action {
+        ADD, REMOVE, INVITE;
 
-    public static void send(UUID[] uuids, byte action) {
-        if (action <= 0 || action > 3 || uuids == null || uuids.length < 1) {
+        public static Action fromByte(byte b) {
+            for (Action action : Action.values()) {
+                if (action.ordinal() == b) return action;
+            }
+            return null;
+        }
+    }
+
+    public static void send(UUID[] uuids, Action action) {
+        if (uuids == null || uuids.length < 1) {
             return;
         }
 
@@ -28,7 +35,7 @@ public class AddonMessageUtil {
         Laby.labyAPI()
                 .labyConnect()
                 .getSession()
-                .sendAddonDevelopment(WorldsharingAddon.INSTANCE.addonInfo().getNamespace(), uuids, new byte[]{action});
+                .sendAddonDevelopment(WorldsharingAddon.INSTANCE.addonInfo().getNamespace(), uuids, new byte[]{(byte) action.ordinal()});
     }
 
     public static String[] getFriends() {

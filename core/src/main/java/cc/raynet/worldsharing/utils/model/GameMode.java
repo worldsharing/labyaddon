@@ -5,30 +5,23 @@ import net.labymod.api.util.CharSequences;
 
 public enum GameMode {
 
-    SURVIVAL(0),
-    CREATIVE(1),
-    ADVENTURE(2),
-    SPECTATOR(3);
+    SURVIVAL,
+    CREATIVE,
+    ADVENTURE,
+    SPECTATOR;
 
-    private final int id;
-    private final String name;
-
-    GameMode(int id) {
-        this.id = id;
-        this.name = CharSequences.toString(CharSequences.capitalize(name().toLowerCase()));
-    }
+    private final String name = CharSequences.toString(CharSequences.capitalize(name().toLowerCase()));
 
     public static GameMode fromId(int id) {
-        for (GameMode mode : GameMode.values()) {
-            if (mode.getId() == id) {
-                return mode;
-            }
+        if (id < 0 || id >= values().length) {
+            return null;
         }
-        return null;
+
+        return values()[id];
     }
 
     public int getId() {
-        return this.id;
+        return ordinal();
     }
 
     public String getName() {

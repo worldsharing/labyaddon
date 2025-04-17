@@ -4,23 +4,20 @@ import net.labymod.api.util.I18n;
 
 public enum WorldVisibility {
 
-    INVITE(0),
-    FRIENDS(1),
-    PUBLIC(2);
-
-    public final byte value;
-
-    WorldVisibility(int value) {
-        this.value = (byte) value;
-    }
+    INVITE,
+    FRIENDS,
+    PUBLIC;
 
     public static WorldVisibility fromValue(byte value) {
-        for (var v : WorldVisibility.values()) {
-            if (v.value == value) {
-                return v;
-            }
+        if (value < 0 || value >= values().length) {
+            return null;
         }
-        return null;
+        return values()[value];
+    }
+
+
+    public byte get() {
+        return (byte) ordinal();
     }
 
     @Override

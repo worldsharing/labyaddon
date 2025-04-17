@@ -9,20 +9,18 @@ import net.labymod.api.util.io.web.exception.WebRequestException;
 import net.labymod.api.util.io.web.request.Request;
 import net.labymod.api.util.io.web.request.Request.Method;
 import net.labymod.api.util.io.web.request.Response;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 
 public class API {
 
     private final static String endpoint = "https://" + WorldsharingAddon.GATEWAY_DOMAIN;
-    public static Pair<String, InetAddress> selectedNode; // name -> ip
+    @Nullable public static Pair<String, InetAddress> selectedNode; // name -> ip
     private static Node closestNode;
+    @Nullable public static CryptUtils.ECCKeyPair keyPair = null;
 
     public static InetAddress getClosestNode(InetAddress address) {
         if (!WorldsharingAddon.INSTANCE.configuration().enabled().get() || !Utils.isLanWorldDomain(address.getHostName())) {
@@ -33,6 +31,7 @@ public class API {
 
     public static void init() {
         try {
+            keyPair = CryptUtils.generateECCKeyPair();
             WorldsharingAddon.INSTANCE.nodes = getNodes();
             closestNode = getClosestNode();
         } catch (Exception e) {
@@ -48,7 +47,7 @@ public class API {
         }
     }
 
-    public static Control getControl() throws WebRequestException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public static Control getControl() throws WebRequestException {
         Response<Control> req = Request.ofGson(new TypeToken<Control>() {})
                 .method(Method.GET)
                 .url(endpoint+"/connect/control")
@@ -62,9 +61,6 @@ public class API {
             throw new WebRequestException(new Exception("Unexpected response code:" + req.getStatusCode()));
         }
 
-        Control control = req.get();
-        control.key = CryptUtils.convertPKCS1ToPublicKey(control.publickey.getBytes(StandardCharsets.UTF_8));
-        control.publickey = null;
         return req.get();
     }
 
@@ -111,7 +107,6 @@ public class API {
     public static class Control {
         public String host;
         public int port;
-        public PublicKey key;
-        String publickey;
+        public String key;
     }
 }

@@ -9,7 +9,7 @@ import java.util.Base64;
 
 import static cc.raynet.worldsharing.WorldsharingAddon.WORLD_HOST_PATTERN;
 
-public class Utils {
+public final class Utils {
 
     private static final SecureRandom random = new SecureRandom();
     public static SocketAddress proxyChannelAddress;

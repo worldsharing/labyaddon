@@ -18,18 +18,28 @@ public class DebugCommand extends Command {
         if (!instance.sessionHandler.isConnected()) {
             return false;
         }
-        displayMessage("§cState: §f" + instance.sessionHandler.getState());
-        displayMessage("§cConnected: §f" + instance.sessionHandler.isConnected());
-        displayMessage("§cWhitelisted: §f" + String.join(", ", instance.sessionHandler.whitelistedPlayers));
-        displayMessage("§cHostname: §f" + instance.sessionHandler.tunnelInfo.hostname);
-        displayMessage("§cVisibility: §f" + instance.sessionHandler.tunnelInfo.visibility);
+
+        StringBuilder message = new StringBuilder();
+
+        message.append("§cState: §f").append(instance.sessionHandler.getState()).append("\n")
+                .append("§cConnected: §f").append(instance.sessionHandler.isConnected()).append("\n")
+                .append("§cWhitelisted: §f").append(String.join(", ", instance.sessionHandler.whitelistedPlayers)).append("\n")
+                .append("§cHostname: §f").append(instance.sessionHandler.tunnelInfo.hostname).append("\n")
+                .append("§cVisibility: §f").append(instance.sessionHandler.tunnelInfo.visibility).append("\n");
+
         if (!instance.sessionHandler.players.isEmpty()) {
-            displayMessage("§cConnected: §f");
+            message.append("§cConnected: §f\n");
             for (var p : instance.sessionHandler.players) {
-                displayMessage("§c> " + p.username + (p.isBedrock ? "§7 (bedrock) §c" : " ") + "§7- §c" + parseNode(p.nodeIP));
+                message.append("§c> ")
+                        .append(p.username)
+                        .append(p.isBedrock ? "§7 (bedrock) §c" : " ")
+                        .append("§7- §c")
+                        .append(parseNode(p.nodeIP))
+                        .append("\n");
             }
         }
 
+        displayMessage(message.toString());
         return true;
     }
 

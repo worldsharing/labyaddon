@@ -6,14 +6,14 @@ import cc.raynet.worldsharing.protocol.model.PacketHandler;
 
 public class PacketSharedSecret extends Packet {
 
-    private final byte[] encryptedSharedSecret;
+    private final byte[] key;
 
     public PacketSharedSecret() {
         this(null);
     }
 
-    public PacketSharedSecret(byte[] encryptedSharedSecret) {
-        this.encryptedSharedSecret = encryptedSharedSecret;
+    public PacketSharedSecret(byte[] key) {
+        this.key = key;
     }
 
     @Override
@@ -23,10 +23,10 @@ public class PacketSharedSecret extends Packet {
 
     @Override
     public void write(PacketBuffer buf) {
-        if (encryptedSharedSecret == null) {
+        if (key == null) {
             return;
         }
-        buf.writeBytes(encryptedSharedSecret);
+        buf.writeBytes(key);
     }
 
     @Override

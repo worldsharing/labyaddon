@@ -14,7 +14,7 @@ public class PacketVisibilityUpdate extends Packet {
     }
 
     public PacketVisibilityUpdate(WorldVisibility visibility) {
-        this(visibility.value);
+        this(visibility.get());
     }
 
     public PacketVisibilityUpdate(byte visibility) {

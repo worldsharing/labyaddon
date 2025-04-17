@@ -17,7 +17,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-public class Tunnel {
+public final class Tunnel {
 
     private final SessionHandler sessionHandler;
     private final QuicClientConnection connection;
@@ -52,8 +52,7 @@ public class Tunnel {
         buffer.writeBytes(sessionHandler.tunnelInfo.key.getBytes(StandardCharsets.UTF_8));
         buffer.flush();
 
-        authStream.getOutputStream()
-                .write(CryptUtils.encryptWithPublicKey(buffer.toByteArray(), CryptUtils.decodePKIXPublicKey(t.publicKey, "RSA")));
+        authStream.getOutputStream().write(CryptUtils.encryptWithPublicKey(buffer.toByteArray(), CryptUtils.decodePKIXPublicKey(t.publicKey, "RSA")));
 
         try {
             while (connection.isConnected()) {
