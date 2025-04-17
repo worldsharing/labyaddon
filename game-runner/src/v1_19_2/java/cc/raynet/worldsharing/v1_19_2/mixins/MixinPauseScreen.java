@@ -27,7 +27,7 @@ public abstract class MixinPauseScreen extends Screen {
 
     @Inject(method = "createPauseMenu", at = @At("TAIL"))
     private void onCreatePauseMenu(CallbackInfo ci) {
-        if (!WorldsharingAddon.INSTANCE.isConnected()) {
+        if (!WorldsharingAddon.INSTANCE.hasAccess()) {
             return;
         }
         if (Minecraft.getInstance().getSingleplayerServer() == null) {

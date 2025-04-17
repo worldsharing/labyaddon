@@ -51,7 +51,7 @@ public class DashboardActivity extends Activity {
     @Override
     public void initialize(Parent parent) {
         super.initialize(parent);
-        if (!addon.isConnected() || addon.manager() == null) {
+        if (!addon.hasAccess() || addon.manager() == null) {
             return;
         }
         WorldManager manager = addon.manager();

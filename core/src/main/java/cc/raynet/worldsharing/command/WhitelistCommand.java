@@ -20,7 +20,7 @@ public class WhitelistCommand extends Command {
 
     @Override
     public boolean execute(String prefix, String[] args) {
-        if (!addon.isConnected() || !addon.sessionHandler.isConnected()) {
+        if (!addon.hasAccess() || !addon.sessionHandler.isConnected()) {
             return false;
         }
 

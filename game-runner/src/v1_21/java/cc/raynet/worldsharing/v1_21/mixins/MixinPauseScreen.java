@@ -35,7 +35,7 @@ public abstract class MixinPauseScreen {
         if (Minecraft.getInstance()
                 .getSingleplayerServer() != null && (component.equals(SHARE_TO_LAN) || component.equals(PLAYER_REPORTING) && Minecraft.getInstance()
                 .getSingleplayerServer()
-                .isPublished()) && WorldsharingAddon.INSTANCE.isConnected()) {
+                .isPublished()) && WorldsharingAddon.INSTANCE.hasAccess()) {
 
             return Button.builder(Component.literal(I18n.getTranslation(component.equals(SHARE_TO_LAN) ? "worldsharing.menu.invite_friends" : "worldsharing.menu.manage_world")), button -> Laby.labyAPI()
                     .minecraft()

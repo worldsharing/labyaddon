@@ -17,7 +17,7 @@ public abstract class MixinPauseScreen extends GuiScreen {
 
     @Inject(method = "initGui", at = @At("TAIL"))
     private void changeShareToLanButtonText(CallbackInfo ci) {
-        if (!WorldsharingAddon.INSTANCE.isConnected()) {
+        if (!WorldsharingAddon.INSTANCE.hasAccess()) {
             return;
         }
 
@@ -36,7 +36,7 @@ public abstract class MixinPauseScreen extends GuiScreen {
 
     @Inject(method = "actionPerformed", at = @At("HEAD"), cancellable = true)
     private void modifyShareToLanInteraction(GuiButton guiButton, CallbackInfo ci) {
-        if (guiButton.id == 7 && WorldsharingAddon.INSTANCE.isConnected()) {
+        if (guiButton.id == 7 && WorldsharingAddon.INSTANCE.hasAccess()) {
             ci.cancel();
             Laby.labyAPI().minecraft().minecraftWindow().displayScreen(WorldsharingAddon.INSTANCE.dashboardActivity);
         }

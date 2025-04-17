@@ -64,7 +64,7 @@ public class WorldsharingAddon extends LabyAddon<AddonConfiguration> {
         this.labyAPI().interactionMenuRegistry().register(new KickBulletPoint(this));
     }
 
-    public boolean isConnected() {
+    public boolean hasAccess() {
         return configuration().enabled().get() && labyAPI().minecraft()
                 .sessionAccessor()
                 .isPremium() && labyAPI().minecraft().isSingleplayer();

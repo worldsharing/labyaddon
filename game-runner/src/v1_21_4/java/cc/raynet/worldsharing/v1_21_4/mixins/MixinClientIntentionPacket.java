@@ -11,7 +11,7 @@ public class MixinClientIntentionPacket {
 
     @ModifyConstant(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V", constant = @Constant(intValue = 255))
     private static int increaseMaxValue(int i) {
-        if (WorldsharingAddon.INSTANCE.isConnected()) {
+        if (WorldsharingAddon.INSTANCE.hasAccess()) {
             return Short.MAX_VALUE;
         }
         return i;
