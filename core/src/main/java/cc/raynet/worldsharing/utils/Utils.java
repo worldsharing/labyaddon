@@ -1,31 +1,65 @@
 package cc.raynet.worldsharing.utils;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
 import net.labymod.api.Laby;
+import net.labymod.api.labyconnect.LabyConnectSession;
+import net.labymod.api.labyconnect.TokenStorage;
+import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Constructor;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.security.SecureRandom;
-import java.util.Base64;
-
-import static cc.raynet.worldsharing.WorldsharingAddon.WORLD_HOST_PATTERN;
 
 public final class Utils {
 
-    private static final SecureRandom random = new SecureRandom();
+    // Credits: https://github.com/Gaming32/world-host/
+    public static Constructor<? extends ChannelInitializer<Channel>> channelInitConstructor = null;
     public static SocketAddress proxyChannelAddress;
 
-    public static boolean isLanWorldDomain(String s) {
-        return WORLD_HOST_PATTERN.matcher(s).matches();
-    }
-
-    public static String randomString(int length) {
-        byte[] bytes = new byte[length];
-        random.nextBytes(bytes);
-        return Base64.getEncoder().encodeToString(bytes).substring(0, length);
-    }
-
     public static String getBrand(String fallback) {
-        return WorldsharingAddon.INSTANCE.sessionHandler.isConnected() ? Laby.labyAPI().getName() + "'s world" : fallback;
+        if (WorldsharingAddon.INSTANCE == null || WorldsharingAddon.INSTANCE.sessionHandler == null || !WorldsharingAddon.INSTANCE.sessionHandler.isConnected()) {
+            return fallback;
+        }
+        return Laby.labyAPI().getName() + "'s world";
     }
 
+
+    public static @Nullable String getLabyConnectToken() {
+        LabyConnectSession session = Laby.labyAPI().labyConnect().getSession();
+        if(session == null) return null;
+
+        TokenStorage.Token token = session.tokenStorage().getToken(
+                TokenStorage.Purpose.JWT,
+                session.self().getUniqueId()
+        );
+
+        if(token == null || token.isExpired()) return null;
+
+        return token.getToken();
+    }
+
+    public static InetSocketAddress splitHostAndPort(String address) throws IllegalArgumentException {
+        String host;
+        int port;
+
+        if (address.startsWith("[")) {
+            int bracketEnd = address.indexOf(']');
+            if (bracketEnd == -1 || address.length() <= bracketEnd + 2 || address.charAt(bracketEnd + 1) != ':') {
+                throw new IllegalArgumentException("Invalid IPv6 address format");
+            }
+            host = address.substring(1, bracketEnd);
+            port = Integer.parseInt(address.substring(bracketEnd + 2));
+        } else {
+            int colonIndex = address.lastIndexOf(':');
+            if (colonIndex == -1) {
+                throw new IllegalArgumentException("Missing port");
+            }
+            host = address.substring(0, colonIndex);
+            port = Integer.parseInt(address.substring(colonIndex + 1));
+        }
+
+        return new InetSocketAddress(host, port);
+    }
 }

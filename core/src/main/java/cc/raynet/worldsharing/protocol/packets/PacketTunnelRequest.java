@@ -4,30 +4,26 @@ import cc.raynet.worldsharing.protocol.PacketBuffer;
 import cc.raynet.worldsharing.protocol.model.Packet;
 import cc.raynet.worldsharing.protocol.model.PacketHandler;
 
-public class PacketEncryptionResponse extends Packet {
+public class PacketTunnelRequest extends Packet {
 
-    public byte[] verifyToken;
-
-    public PacketEncryptionResponse() {
-        this(null);
-    }
-
-    public PacketEncryptionResponse(byte[] verifyToken) {
-        this.verifyToken = verifyToken;
-    }
+    public String target;
+    public byte[] publicKey;
 
     @Override
     public void read(PacketBuffer buf) {
-        verifyToken = buf.readByteArray();
+        target = buf.readString();
+        publicKey = buf.readByteArray();
     }
 
     @Override
     public void write(PacketBuffer buf) {
-        buf.writeByteArray(verifyToken);
+        buf.writeString(target);
+        buf.writeByteArray(publicKey);
     }
 
     @Override
     public void handle(PacketHandler handler) {
-
+        handler.handle(this);
     }
+
 }

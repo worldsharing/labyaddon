@@ -12,10 +12,10 @@ labyMod {
     defaultPackageName = "cc.raynet.worldsharing"
     addonInfo {
         namespace = "worldsharing"
-        displayName = "World Sharing"
+        displayName = "Worldsharing"
         author = "Raynet Team"
         description = "Play on your Singleplayer world with your friends!"
-        minecraftVersion = "1.8<1.21.5"
+        minecraftVersion = "1.8.9<1.21.5"
         version = rootProject.version.toString()
     }
 
@@ -23,14 +23,13 @@ labyMod {
         registerVersion(versions.toTypedArray()) {
             runs {
                 getByName("client") {
-//                    devLogin = true
+                    devLogin = false
                 }
             }
 
             accessWidener.set(file("./game-runner/src/${this.sourceSetName}/resources/worldsharing-${versionId}.accesswidener"))
 
         }
-
     }
 }
 

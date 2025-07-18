@@ -1,17 +1,17 @@
 package cc.raynet.worldsharing.command;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
+import cc.raynet.worldsharing.utils.Utils;
 import net.labymod.api.client.chat.command.Command;
 
 public class DebugCommand extends Command {
 
     private final WorldsharingAddon instance;
 
-    public DebugCommand() {
+    public DebugCommand(WorldsharingAddon addon) {
         super("wsdebug");
-        this.instance = WorldsharingAddon.INSTANCE;
+        this.instance = addon;
     }
-
 
     @Override
     public boolean execute(String prefix, String[] arguments) {
@@ -31,24 +31,15 @@ public class DebugCommand extends Command {
             message.append("§cConnected: §f\n");
             for (var p : instance.sessionHandler.players) {
                 message.append("§c> ")
-                        .append(p.username)
+                        .append(p.name)
                         .append(p.isBedrock ? "§7 (bedrock) §c" : " ")
                         .append("§7- §c")
-                        .append(parseNode(p.nodeIP))
+                        .append(Utils.splitHostAndPort(p.tunnel.tunnelRequest.target).getHostString())
                         .append("\n");
             }
         }
 
         displayMessage(message.toString());
         return true;
-    }
-
-    private String parseNode(String ip) {
-        for (var n : instance.nodes.entrySet()) {
-            if (n.getValue().getHostAddress().equals(ip)) {
-                return n.getKey() + " (" + ip + ")";
-            }
-        }
-        return ip;
     }
 }

@@ -1,7 +1,6 @@
 package cc.raynet.worldsharing.v1_20_2.mixins;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
-import cc.raynet.worldsharing.protocol.proxy.ChannelProxy;
 import cc.raynet.worldsharing.utils.Utils;
 import com.mojang.datafixers.DataFixer;
 import io.netty.bootstrap.ServerBootstrap;
@@ -70,9 +69,8 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
 
     private ChannelInitializer<Channel> createChannelInitializer(ServerConnectionListener listener) {
         try {
-            return ChannelProxy.channelInitConstructor.newInstance(listener);
+            return Utils.channelInitConstructor.newInstance(listener);
         } catch (ReflectiveOperationException e) {
-            // TODO: UncheckedReflectiveOperationException when 1.20.4+ becomes the minimum
             throw new RuntimeException(e);
         }
     }

@@ -2,31 +2,18 @@ package cc.raynet.worldsharing.utils;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
 import io.sentry.Sentry;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.params.X25519KeyGenerationParameters;
-import org.bouncycastle.crypto.params.X25519PrivateKeyParameters;
-import org.bouncycastle.crypto.params.X25519PublicKeyParameters;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
+import org.bouncycastle.crypto.params.HKDFParameters;
 import org.bouncycastle.math.ec.rfc7748.X25519;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyAgreement;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.security.*;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 public final class CryptUtils {
 
@@ -78,7 +65,7 @@ public final class CryptUtils {
         return keyFactory.generatePublic(spec);
     }
 
-    public static ECCKeyPair generateECCKeyPair() throws Exception {
+    public static ECCKeyPair generateECCKeyPair() throws NoSuchAlgorithmException {
         byte[] privateKey = new byte[32];
         X25519.generatePrivateKey(SecureRandom.getInstanceStrong(), privateKey);
 
@@ -86,6 +73,12 @@ public final class CryptUtils {
         X25519.generatePublicKey(privateKey, 0, publicKey, 0);
 
         return new ECCKeyPair(privateKey, publicKey);
+    }
+
+    public static void generateSharedSecret(byte[] key, byte[] peerPublicKey) {
+        HKDFBytesGenerator hkdf = new HKDFBytesGenerator(new SHA256Digest());
+        hkdf.init(new HKDFParameters(key, peerPublicKey, "raynet".getBytes()));
+        hkdf.generateBytes(key, 0, key.length);
     }
 
     public record ECCKeyPair(byte[] privateKey, byte[] publicKey) {

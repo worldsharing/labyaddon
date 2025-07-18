@@ -12,7 +12,6 @@ import cc.raynet.worldsharing.utils.model.WorldVisibility;
 import net.labymod.api.Laby;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.component.format.NamedTextColor;
-import net.labymod.api.client.gui.icon.Icon;
 import net.labymod.api.client.gui.screen.Parent;
 import net.labymod.api.client.gui.screen.activity.Activity;
 import net.labymod.api.client.gui.screen.activity.AutoActivity;
@@ -248,8 +247,8 @@ public class DashboardActivity extends Activity {
 
     private synchronized void init() {
         WorldManager manager = addon.manager();
-        hostPlayer = new Player(Laby.labyAPI().getName(), null, false, null);
-        hostPlayer.gameMode = manager.getPlayerGameMode(hostPlayer.username);
+        hostPlayer = new Player(Laby.labyAPI().getName(), false, null);
+        hostPlayer.gameMode = manager.getPlayerGameMode(hostPlayer.name);
 
         if (manager.isPublished() || manager.publishLanWorld(port, manager.getGameMode(), manager.cheatsEnabled())) {
             tempSlots = manager.getSlots();
@@ -264,10 +263,10 @@ public class DashboardActivity extends Activity {
         FlexibleContentWidget player = new FlexibleContentWidget();
         player.addId("player");
 
-        IconWidget headWidget = new IconWidget(Icon.head(p.username));
+        IconWidget headWidget = new IconWidget(p.getHead());
         player.addContent(headWidget);
 
-        ComponentWidget title = ComponentWidget.text(p.username + (p.isBedrock ? " (Bedrock)" : ""));
+        ComponentWidget title = ComponentWidget.text(p.name + (p.isBedrock ? " (Bedrock)" : "") + (p.tunnel == null ? "" : " " + p.tunnel.usedType.name()));
         player.addContent(title);
 
         FlexibleContentWidget buttons = new FlexibleContentWidget();
@@ -278,18 +277,18 @@ public class DashboardActivity extends Activity {
         playerGameMode.setSelected(p.gameMode);
         playerGameMode.setChangeListener(gameMode -> {
             p.gameMode = gameMode;
-            addon.manager().setPlayerGameMode(p.username, gameMode);
+            addon.manager().setPlayerGameMode(p.name, gameMode);
         });
 
         buttons.addContent(playerGameMode);
 
         buttons.addContent(ButtonWidget.component(Component.text(p.operator ? "Deop" : "Op"), () -> {
-            addon.manager().setOperator(p.username, !p.operator);
+            addon.manager().setOperator(p.name, !p.operator);
             p.operator = !p.operator;
             reloadDashboard();
         }));
 
-        if (!Laby.labyAPI().getName().equals(p.username)) {
+        if (!Laby.labyAPI().getName().equals(p.name)) {
             buttons.addContent(ButtonWidget.component(Component.translatable("worldsharing.menu.kick"), () -> {
                 var in = new TextFieldWidget();
                 in.maximalLength(255);
@@ -297,12 +296,12 @@ public class DashboardActivity extends Activity {
                 in.placeholder(Component.translatable("worldsharing.menu.reason"));
                 in.setFocused(true);
                 SimpleAdvancedPopup.builder()
-                    .title(Component.translatable("worldsharing.messages.kick", Component.text(p.username)))
+                    .title(Component.translatable("worldsharing.messages.kick", Component.text(p.name)))
                     .widget(() -> in)
                     .addButton(SimplePopupButton.create(Component.translatable("worldsharing.menu.kick"), e -> {
                         String reason = in.getText();
                         if (reason.isEmpty()) reason = "You were kicked from the World";
-                        addon.manager().kickPlayer(p.username, reason);
+                        addon.manager().kickPlayer(p.name, reason);
                         reloadDashboard();
                     }))
                     .build()

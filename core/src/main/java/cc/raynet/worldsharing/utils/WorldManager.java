@@ -2,13 +2,16 @@ package cc.raynet.worldsharing.utils;
 
 import cc.raynet.worldsharing.utils.model.GameDifficulty;
 import cc.raynet.worldsharing.utils.model.GameMode;
-import io.netty.channel.ChannelHandler;
+import io.netty.channel.Channel;
 import net.labymod.api.reference.annotation.Referenceable;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 @Referenceable
 public interface WorldManager {
 
-    void openChannel(ChannelHandler client);
+    void openChannel(Consumer<Channel> optionalConsumer, CompletableFuture<Channel> optionalFuture);
 
     int getSuitableLanPort();
 

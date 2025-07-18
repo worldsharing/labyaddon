@@ -10,8 +10,16 @@ import java.util.List;
 
 public class PacketPrepender extends ByteToMessageDecoder {
 
+    private final boolean selfRemove;
+
     public PacketPrepender() {
+        this(false);
     }
+
+    public PacketPrepender(boolean selfRemove) {
+        this.selfRemove = selfRemove;
+    }
+
 
     protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> objects) {
         buffer.markReaderIndex();
@@ -31,12 +39,15 @@ public class PacketPrepender extends ByteToMessageDecoder {
                     int varInt = buf.readVarIntFromBuffer();
                     if (buffer.readableBytes() >= varInt) {
                         objects.add(buffer.readBytes(varInt));
+                        if (selfRemove) {
+                            ctx.pipeline().remove(this);
+                        }
                         return;
                     }
 
                     buffer.resetReaderIndex();
                 } finally {
-                    buf.getBuffer().release();
+                    buf.buffer().release();
                 }
 
                 return;

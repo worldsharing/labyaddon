@@ -4,17 +4,21 @@ dependencies {
     labyProcessor()
     api(project(":api"))
 
-    // quic
-    addonMavenDependency("tech.kwik:kwik:0.8.13")
-    addonMavenDependency("tech.kwik:agent15:2.0")
-    addonMavenDependency("at.favre.lib:hkdf:2.0.0")
-
-    // asn.1
     addonMavenDependency("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    addonMavenDependency("io.sentry:sentry:7.14.0")
 
     compileOnly("io.netty:netty-all:4.1.115.Final")
+    addonMavenDependency("io.netty.incubator:netty-incubator-codec-classes-quic:0.0.73.Final.natives") {
+        exclude("io.netty")
+    }
 
-    addonMavenDependency("io.sentry:sentry:7.14.0")
+    addonMavenDependency("tech.kwik:kwik:0.10.3")
+    addonMavenDependency("tech.kwik:agent15:2.0")
+    addonMavenDependency("at.favre.lib:hkdf:2.0.0")
+}
+
+repositories {
+    maven("https://maven.mxha.de")
 }
 
 labyModAnnotationProcessor {

@@ -18,7 +18,6 @@ public class PacketSharedSecret extends Packet {
 
     @Override
     public void read(PacketBuffer buf) {
-
     }
 
     @Override

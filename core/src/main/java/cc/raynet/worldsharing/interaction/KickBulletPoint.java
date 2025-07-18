@@ -28,7 +28,7 @@ public class KickBulletPoint implements BulletPoint {
 
     @Override
     public void execute(Player player) {
-        if (WorldsharingAddon.INSTANCE.hasAccess() & player != null) {
+        if (addon.hasAccess() & player != null) {
             var in = new TextFieldWidget();
             in.maximalLength(255);
             in.setEditable(true);
@@ -50,6 +50,6 @@ public class KickBulletPoint implements BulletPoint {
 
     @Override
     public boolean isVisible(Player playerInfo) {
-        return BulletPoint.super.isVisible(playerInfo) && WorldsharingAddon.INSTANCE.hasAccess();
+        return BulletPoint.super.isVisible(playerInfo) && addon.hasAccess();
     }
 }

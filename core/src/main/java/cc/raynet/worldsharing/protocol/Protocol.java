@@ -18,11 +18,11 @@ public class Protocol {
         register(6, PacketPong.class);
         register(7, PacketDisconnect.class);
         register(8, PacketError.class);
-        register(18, PacketRequestTunnel.class);
+        register(18, PacketTunnelRequest.class);
         register(19, PacketTunnelInfo.class);
-        register(40, PacketEncryptionStart.class);
-        register(41, PacketEncryptionRequest.class);
-        register(42, PacketEncryptionResponse.class);
+        register(40, PacketAuthStart.class);
+        register(41, PacketAuthRequest.class);
+        register(42, PacketAuthResponse.class);
         register(43, PacketLogin.class);
         register(44, PacketVisibilityUpdate.class);
         register(45, PacketWhitelistAdd.class);

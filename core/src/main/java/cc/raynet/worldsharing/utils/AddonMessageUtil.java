@@ -17,10 +17,8 @@ public final class AddonMessageUtil {
         ADD, REMOVE, INVITE;
 
         public static Action fromByte(byte b) {
-            for (Action action : Action.values()) {
-                if (action.ordinal() == b) return action;
-            }
-            return null;
+            if (b < 0 || b >= Action.values().length) return null;
+            return Action.values()[b];
         }
     }
 
@@ -54,7 +52,7 @@ public final class AddonMessageUtil {
         return friends.toArray(String[]::new);
     }
 
-    public static UUID[] getOnlineFriendsUUIDs() {
+    public static UUID[] getOnlineFriendsUUIDs(SessionHandler sessionHandler) {
         if (Laby.labyAPI().labyConnect().getSession() == null) {
             return null;
         }
@@ -63,8 +61,6 @@ public final class AddonMessageUtil {
             return null;
         }
         List<UUID> friendsUUIDs = new ArrayList<>();
-        SessionHandler sessionHandler = WorldsharingAddon.INSTANCE.sessionHandler;
-
 
         for (Friend friend : labyFriends) {
             if (!friend.isOnline()) {

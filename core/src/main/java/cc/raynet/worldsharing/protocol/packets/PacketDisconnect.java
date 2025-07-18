@@ -20,6 +20,6 @@ public class PacketDisconnect extends Packet {
 
     @Override
     public void handle(PacketHandler handler) {
-
+        handler.handle(this);
     }
 }

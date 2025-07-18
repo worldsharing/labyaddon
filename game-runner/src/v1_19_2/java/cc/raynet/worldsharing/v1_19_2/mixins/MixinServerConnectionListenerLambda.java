@@ -1,6 +1,6 @@
 package cc.raynet.worldsharing.v1_19_2.mixins;
 
-import cc.raynet.worldsharing.protocol.proxy.ChannelProxy;
+import cc.raynet.worldsharing.utils.Utils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import net.minecraft.server.network.ServerConnectionListener;
@@ -14,9 +14,9 @@ public abstract class MixinServerConnectionListenerLambda extends ChannelInitial
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void storeClass(ServerConnectionListener this$0, CallbackInfo ci) throws NoSuchMethodException {
-        if (ChannelProxy.channelInitConstructor == null) {
-            ChannelProxy.channelInitConstructor = getClass().getDeclaredConstructor(ServerConnectionListener.class);
-            ChannelProxy.channelInitConstructor.setAccessible(true);
+        if (Utils.channelInitConstructor == null) {
+            Utils.channelInitConstructor = getClass().getDeclaredConstructor(ServerConnectionListener.class);
+            Utils.channelInitConstructor.setAccessible(true);
         }
     }
 }

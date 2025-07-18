@@ -4,16 +4,9 @@ import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-public class PacketBuffer {
-
-    private final ByteBuf buffer;
-
-    public PacketBuffer(ByteBuf buffer) {
-        this.buffer = buffer;
-    }
+public record PacketBuffer(ByteBuf buffer) {
 
     public static void writeVarIntToBuffer(ByteBuf buf, int input) {
         while ((input & -128) != 0) {
@@ -22,16 +15,6 @@ public class PacketBuffer {
         }
 
         buf.writeByte(input);
-    }
-
-    public static void writeVarIntToStream(OutputStream outputStream, int tmp) throws IOException {
-        do {
-            // Encode next 7 bits + terminator bit
-            int bits = tmp & 0x7F;
-            tmp >>>= 7;
-            byte b = (byte) (bits + ((tmp != 0) ? 0x80 : 0));
-            outputStream.write(b);
-        } while (tmp != 0);
     }
 
     public static int readVarIntFromStream(InputStream inputStream) throws IOException {
@@ -51,6 +34,23 @@ public class PacketBuffer {
         return result;
     }
 
+    public static int readVarIntFromByteBuf(ByteBuf buf) throws IOException {
+        int tmp;
+        int result = 0;
+        int shift = 0;
+        int bytesRead = 0;
+        do {
+            tmp = buf.readByte();
+            result |= (tmp & 0x7F) << shift;
+            shift += 7;
+            bytesRead++;
+            if (bytesRead > 5) { // VarInt can have at most 5 bytes in this encoding
+                throw new IOException("VarInt is too long");
+            }
+        } while ((tmp & 0x80) != 0);
+        return result;
+    }
+
     public static int varIntSize(int value) {
         int result = 0;
         do {
@@ -58,10 +58,6 @@ public class PacketBuffer {
             value >>>= 7;
         } while (value != 0);
         return result;
-    }
-
-    public ByteBuf getBuffer() {
-        return buffer;
     }
 
     public int size() {
@@ -138,12 +134,13 @@ public class PacketBuffer {
         buffer.writeBytes(string.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static String readStringVarInt(InputStream stream) throws IOException {
-        byte[] bytes = new byte[readVarIntFromStream(stream)];
-        if(stream.read(bytes) < 1 && bytes.length > 1) {
-            throw new IOException("empty string");
+    public static String readSerializedString(ByteBuf buf) throws IOException {
+        int length = readVarIntFromByteBuf(buf);
+        if (buf.readableBytes() < length) {
+            throw new IOException("Not enough bytes to read the string");
         }
+        byte[] bytes = new byte[length];
+        buf.readBytes(bytes);
         return new String(bytes, StandardCharsets.UTF_8);
     }
-
 }

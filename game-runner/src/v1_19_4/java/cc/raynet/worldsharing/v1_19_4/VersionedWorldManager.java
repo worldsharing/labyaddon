@@ -6,7 +6,6 @@ import cc.raynet.worldsharing.utils.model.GameDifficulty;
 import cc.raynet.worldsharing.utils.model.GameMode;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.local.LocalChannel;
 import net.labymod.api.models.Implements;
@@ -21,17 +20,24 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 
 import javax.inject.Singleton;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 @Singleton
 @Implements(WorldManager.class)
 public class VersionedWorldManager implements WorldManager {
 
     @Override
-    public void openChannel(ChannelHandler client) {
+    public void openChannel(Consumer<Channel> consumer, CompletableFuture<Channel> future) {
         new Bootstrap().group(ServerConnectionListener.SERVER_EVENT_GROUP.get()).handler(new ChannelInitializer<>() {
             @Override
             protected void initChannel(Channel ch) {
-                ch.pipeline().addLast("handler", client);
+                if (future != null && !future.isDone()) {
+                    future.complete(ch);
+                }
+                if (consumer != null) {
+                    consumer.accept(ch);
+                }
             }
         }).channel(LocalChannel.class).connect(Utils.proxyChannelAddress).syncUninterruptibly();
     }

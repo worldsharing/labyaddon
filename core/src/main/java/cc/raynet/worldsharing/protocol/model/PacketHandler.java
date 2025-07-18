@@ -36,9 +36,9 @@ public abstract class PacketHandler extends SimpleChannelInboundHandler<Object> 
         packet.handle(this);
     }
 
-    public abstract void handle(PacketEncryptionRequest enc);
+    public abstract void handle(PacketAuthRequest enc);
 
-    public abstract void handle(PacketRequestTunnel rt);
+    public abstract void handle(PacketTunnelRequest tunnelRequest);
 
     public abstract void handle(PacketTunnelInfo ti);
 

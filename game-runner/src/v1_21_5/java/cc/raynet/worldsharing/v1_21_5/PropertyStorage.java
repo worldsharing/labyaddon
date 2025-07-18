@@ -1,4 +1,4 @@
-package cc.raynet.worldsharing.v1_21_4.client;
+package cc.raynet.worldsharing.v1_21_5;
 
 import com.mojang.authlib.properties.Property;
 

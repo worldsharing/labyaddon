@@ -53,7 +53,7 @@ public class WhitelistCommand extends Command {
             }
         } catch (Exception e) {
             Sentry.captureException(e);
-            WorldsharingAddon.INSTANCE.logger().error("Failed to manage whitelist", e);
+            addon.logger().error("Failed to manage whitelist", e);
         }
 
         return true;

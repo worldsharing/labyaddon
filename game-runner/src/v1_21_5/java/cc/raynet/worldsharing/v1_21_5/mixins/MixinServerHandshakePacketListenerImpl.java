@@ -1,6 +1,6 @@
 package cc.raynet.worldsharing.v1_21_5.mixins;
 
-import cc.raynet.worldsharing.v1_21_5.client.PropertyStorage;
+import cc.raynet.worldsharing.v1_21_5.PropertyStorage;
 import com.google.gson.Gson;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.network.Connection;
