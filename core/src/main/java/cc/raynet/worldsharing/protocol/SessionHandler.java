@@ -224,12 +224,12 @@ public final class SessionHandler extends PacketHandler {
         }
         Thread.ofVirtual().start(() -> {
             try {
-
                 AbstractTunnel tunnel;
 
                 try {
                     tunnel = AbstractTunnel.preferredType.init(this, tunnelRequest);
                 } catch (UnsatisfiedLinkError e) {
+                    this.addon.logger().error("UnsatisfiedLinkError while trying to init tunnel via NETTY:",e);
                     if (AbstractTunnel.preferredType.equals(AbstractTunnel.Type.NETTY)) {
                         AbstractTunnel.preferredType = AbstractTunnel.Type.KWIK;
                         tunnel = AbstractTunnel.preferredType.init(this, tunnelRequest);

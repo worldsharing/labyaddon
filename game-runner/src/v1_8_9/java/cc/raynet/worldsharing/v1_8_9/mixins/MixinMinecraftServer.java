@@ -33,7 +33,9 @@ public abstract class MixinMinecraftServer extends MinecraftServer {
 
     @Inject(method = "stopServer", at = @At("TAIL"))
     public void stopServer(CallbackInfo ci) {
-        WorldsharingAddon.INSTANCE.sessionHandler.disconnect();
+        if (WorldsharingAddon.INSTANCE != null) {
+            WorldsharingAddon.INSTANCE.sessionHandler.disconnect();
+        }
     }
 
     @Inject(method = "shareToLAN", at = @At(value = "INVOKE",
