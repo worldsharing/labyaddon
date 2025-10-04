@@ -1,6 +1,6 @@
-package cc.raynet.worldsharing.v1_21_5.mixins;
+package cc.raynet.worldsharing.v1_21_9.mixins;
 
-import cc.raynet.worldsharing.v1_21_5.PropertyStorage;
+import cc.raynet.worldsharing.v1_21_9.PropertyStorage;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.network.Connection;
@@ -40,7 +40,7 @@ public abstract class MixinServerLoginPacketListener {
 
         if (properties != null) {
             for (var map : properties) {
-                profile.getProperties().put(map.name(), map);
+                profile.properties().put(map.name(), map);
             }
         }
 

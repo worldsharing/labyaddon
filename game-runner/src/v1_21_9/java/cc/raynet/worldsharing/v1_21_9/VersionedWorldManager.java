@@ -1,4 +1,4 @@
-package cc.raynet.worldsharing.v1_21_5;
+package cc.raynet.worldsharing.v1_21_9;
 
 import cc.raynet.worldsharing.utils.Utils;
 import cc.raynet.worldsharing.utils.WorldManager;
@@ -151,17 +151,14 @@ public class VersionedWorldManager implements WorldManager {
     @Override
     public int getSlots() {
         IntegratedServer server = getServer();
-        if (server == null) {
-            return 0;
-        }
-        return server.getPlayerList().maxPlayers;
+        return server == null ? 0 : IntegratedServer.MAX_PLAYERS;
     }
 
     @Override
     public void setSlots(int slots) {
         IntegratedServer server = getServer();
         if (server != null) {
-            server.getPlayerList().maxPlayers = slots;
+            IntegratedServer.MAX_PLAYERS = slots;
             server.invalidateStatus();
         }
     }
@@ -174,6 +171,7 @@ public class VersionedWorldManager implements WorldManager {
         }
         server.getConnection().stop();
         server.publishedPort = -1;
+        IntegratedServer.MAX_PLAYERS = 8;
     }
 
     @Override
@@ -212,9 +210,9 @@ public class VersionedWorldManager implements WorldManager {
         ServerPlayer player = server.getPlayerList().getPlayerByName(username);
         if (player != null) {
             if (op) {
-                server.getPlayerList().op(player.getGameProfile());
+                server.getPlayerList().op(player.nameAndId());
             } else {
-                server.getPlayerList().deop(player.getGameProfile());
+                server.getPlayerList().deop(player.nameAndId());
             }
         }
     }

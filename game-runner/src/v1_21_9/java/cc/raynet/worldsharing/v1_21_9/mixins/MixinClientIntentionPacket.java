@@ -1,4 +1,4 @@
-package cc.raynet.worldsharing.v1_21_5.mixins;
+package cc.raynet.worldsharing.v1_21_9.mixins;
 
 import cc.raynet.worldsharing.WorldsharingAddon;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;

@@ -1,0 +1,6 @@
+accessWidener v1 named
+
+mutable field net/minecraft/client/server/IntegratedServer MAX_PLAYERS I
+accessible field net/minecraft/server/network/ServerConnectionListener channels Ljava/util/List;
+accessible field net/minecraft/client/server/IntegratedServer publishedPort I
+

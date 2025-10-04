@@ -25,7 +25,6 @@ public final class Utils {
         return Laby.labyAPI().getName() + "'s world";
     }
 
-
     public static @Nullable String getLabyConnectToken() {
         LabyConnectSession session = Laby.labyAPI().labyConnect().getSession();
         if(session == null) return null;
