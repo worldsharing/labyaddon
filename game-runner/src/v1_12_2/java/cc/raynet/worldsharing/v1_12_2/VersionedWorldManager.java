@@ -53,12 +53,12 @@ public class VersionedWorldManager implements WorldManager {
     }
 
     @Override
-    public boolean publishLanWorld(int port, GameMode gamemode, boolean allowCheats) {
+    public boolean publishLanWorld(int port, GameMode gameMode, boolean allowCheats) {
         IntegratedServer server = getServer();
         if (server == null) {
             return false;
         }
-        return !server.shareToLAN(GameType.getByID(gamemode.getId()), allowCheats).equals("-1");
+        return !server.shareToLAN(GameType.getByID(gameMode.getId()), allowCheats).equals("-1");
     }
 
     @Override

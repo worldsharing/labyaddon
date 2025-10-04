@@ -15,7 +15,7 @@ public interface WorldManager {
 
     int getSuitableLanPort();
 
-    boolean publishLanWorld(int port, GameMode gamemode, boolean allowCheats);
+    boolean publishLanWorld(int port, GameMode gameMode, boolean allowCheats);
 
     boolean isPublished();
 

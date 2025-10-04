@@ -48,12 +48,12 @@ public class VersionedWorldManager implements WorldManager {
     }
 
     @Override
-    public boolean publishLanWorld(int port, GameMode gamemode, boolean allowCheats) {
+    public boolean publishLanWorld(int port, GameMode gameMode, boolean allowCheats) {
         IntegratedServer server = getServer();
         if (server == null) {
             return false;
         }
-        return server.publishServer(GameType.byId(gamemode.getId()), allowCheats, port);
+        return server.publishServer(GameType.byId(gameMode.getId()), allowCheats, port);
     }
 
     @Override
@@ -162,6 +162,7 @@ public class VersionedWorldManager implements WorldManager {
         IntegratedServer server = getServer();
         if (server != null) {
             server.getPlayerList().maxPlayers = slots;
+            server.invalidateStatus();
         }
     }
 
