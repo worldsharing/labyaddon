@@ -8,7 +8,7 @@ dependencies {
     addonMavenDependency("io.sentry:sentry:7.14.0")
 
     compileOnly("io.netty:netty-all:4.1.115.Final")
-    addonMavenDependency("io.netty.incubator:netty-incubator-codec-classes-quic:0.0.73.Final.natives") {
+    addonMavenDependency("io.netty.incubator:netty-incubator-codec-classes-quic:0.0.74.Final.natives") {
         exclude("io.netty")
     }
 
