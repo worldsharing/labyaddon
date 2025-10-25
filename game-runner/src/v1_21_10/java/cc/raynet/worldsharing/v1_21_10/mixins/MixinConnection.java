@@ -1,7 +1,7 @@
-package cc.raynet.worldsharing.v1_21_9.mixins;
+package cc.raynet.worldsharing.v1_21_10.mixins;
 
 import cc.raynet.worldsharing.utils.Utils;
-import cc.raynet.worldsharing.v1_21_9.PropertyStorage;
+import cc.raynet.worldsharing.v1_21_10.PropertyStorage;
 import com.mojang.authlib.properties.Property;
 import io.netty.channel.Channel;
 import net.minecraft.network.Connection;

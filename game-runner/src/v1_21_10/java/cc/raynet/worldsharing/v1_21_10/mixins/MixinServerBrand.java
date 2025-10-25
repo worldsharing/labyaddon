@@ -1,4 +1,4 @@
-package cc.raynet.worldsharing.v1_21_9.mixins;
+package cc.raynet.worldsharing.v1_21_10.mixins;
 
 import cc.raynet.worldsharing.utils.Utils;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
